@@ -1,0 +1,175 @@
+// Family Market — Prisma schema
+// Database: PostgreSQL (Neon in production)
+// Convention: content fields exist in French (fr) and Arabic (ar).
+// No invented business data — never seed fake products or store info.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------
+
+enum AdminRole {
+  ADMIN
+}
+
+enum MediaType {
+  image
+  video
+}
+
+enum MediaCategory {
+  PRODUCT
+  CATEGORY
+  PROMOTION
+  HERO
+  STORE
+  LOGO
+  OTHER
+}
+
+// ---------------------------------------------------------------
+// Admin
+// ---------------------------------------------------------------
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(ADMIN)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------
+
+model Category {
+  id            String    @id @default(cuid())
+  nameFr        String
+  nameAr        String
+  slug          String    @unique
+  descriptionFr String?
+  descriptionAr String?
+  image         String?
+  isActive      Boolean   @default(true)
+  sortOrder     Int       @default(0)
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model Product {
+  id            String             @id @default(cuid())
+  nameFr        String
+  nameAr        String
+  slug          String             @unique
+  descriptionFr String?
+  descriptionAr String?
+  size          String
+  sku           String?
+  price         Decimal            @db.Decimal(10, 2)
+  salePrice     Decimal?           @db.Decimal(10, 2)
+  image         String?
+  isAvailable   Boolean            @default(true)
+  categoryId    String
+  category      Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  promotions    PromotionProduct[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([categoryId, isAvailable])
+}
+
+// ---------------------------------------------------------------
+// Promotions
+// ---------------------------------------------------------------
+
+model Promotion {
+  id            String             @id @default(cuid())
+  titleFr       String
+  titleAr       String
+  descriptionFr String?
+  descriptionAr String?
+  image         String?
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean            @default(true)
+  products      PromotionProduct[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([isActive, startDate, endDate])
+}
+
+// Join table linking promotions to products. Allows promotions to target
+// specific products without a schema rewrite in a later phase.
+model PromotionProduct {
+  promotionId String
+  productId   String
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([promotionId, productId])
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------
+// Store settings
+// ---------------------------------------------------------------
+
+// Single settings record (only one row may exist — enforced by convention:
+// the app always reads/writes the row with id "default").
+model StoreSettings {
+  id                  String   @id @default("default")
+  storeNameFr         String
+  storeNameAr         String
+  phone               String?
+  whatsapp            String?
+  addressFr           String?
+  addressAr           String?
+  facebookUrl         String?
+  instagramUrl        String?
+  tiktokUrl           String?
+  googleMapsUrl       String?
+  logoImage           String?
+  heroMedia           String?
+  openingTime         String
+  closingTime         String
+  isOpenAutomatically Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------
+
+model MediaAsset {
+  id        String         @id @default(cuid())
+  name      String
+  url       String
+  type      MediaType
+  mimeType  String?
+  size      Int?
+  category  MediaCategory  @default(OTHER)
+  altFr     String?
+  altAr     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([createdAt])
+}

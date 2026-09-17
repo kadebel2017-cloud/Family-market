@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Family Market — design tokens
+ * Brand: gold / black / white. Clean, modern, premium supermarket.
+ * Tailwind CSS v4 theme extension. Custom tokens generate utilities:
+ *   bg-gold-500, text-gold-600, border-black, bg-white, …
+ */
+@theme {
+  /* Gold (brand primary) */
+  --color-gold-50: #fbf8eb;
+  --color-gold-100: #f6efcf;
+  --color-gold-200: #eddfa0;
+  --color-gold-300: #e2c96d;
+  --color-gold-400: #d8b547;
+  --color-gold-500: #c9a227;
+  --color-gold-600: #a97f1e;
+  --color-gold-700: #866019;
+  --color-gold-800: #664a16;
+  --color-gold-900: #4a3712;
+  --color-gold-950: #2b2008;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Black (brand dark) and grays for hierarchy */
+  --color-black: #0a0a0a;
+  --color-ink: #141414;
+  --color-surface: #ffffff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Surfaces */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-muted: #f6f6f4;
+  --color-muted-foreground: #6b6b6b;
+
+  /* Typography */
+  --font-sans: var(--font-noto-sans), var(--font-noto-sans-arabic),
+    system-ui, -apple-system, sans-serif;
+  --font-arabic: var(--font-noto-sans-arabic), system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Shape */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Focus ring (accessible) */
+  --color-ring: var(--color-gold-500);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--color-gold-200);
+  color: var(--color-black);
+}
+
+/* Long words (URLs, addresses, product names) must never create
+ * horizontal scrolling on narrow screens. */
+.prose-break {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Respect users who ask for less motion: neutralise all animation and
+ * transition (including hover zooms and progress transitions). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
