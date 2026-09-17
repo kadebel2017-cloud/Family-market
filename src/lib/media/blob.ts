@@ -4,8 +4,20 @@ import { del, put, type PutBlobResult } from "@vercel/blob";
 
 import { BLOB_BASE_FOLDER } from "./config";
 
+// Vercel Blob resolves credentials itself (see resolveBlobAuth in
+// @vercel/blob): an explicit token, else Vercel OIDC (VERCEL_OIDC_TOKEN /
+// request header) together with a store id, else the static
+// BLOB_READ_WRITE_TOKEN. This guard just avoids calling the SDK when no
+// credential source exists at all, so it must accept both the legacy token
+// and the modern OIDC store connection.
 export function hasBlobStorage(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  // Legacy long-lived read-write token (local dev, or deployments that use it).
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    return true;
+  }
+  // Vercel Blob OIDC: a store connected to the project injects BLOB_STORE_ID
+  // and the SDK obtains a short-lived token automatically.
+  return Boolean(process.env.BLOB_STORE_ID);
 }
 
 export function blobStorageMissingMessage(): string {
