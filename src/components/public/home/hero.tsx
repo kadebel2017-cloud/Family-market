@@ -33,7 +33,7 @@ function SlideMedia({
     return (
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-contain"
+        className="absolute inset-0 h-full w-full object-cover object-center"
         src={slide.url}
         muted
         loop
@@ -45,9 +45,9 @@ function SlideMedia({
     );
   }
 
-  // Full image, never cropped: fitted inside the fixed hero box, original
-  // aspect ratio preserved. Plain <img> is required — next/image needs fixed
-  // dimensions, which would force a cropping ratio.
+  // Banner fill: the image covers the entire fixed hero box, centered.
+  // Plain <img> is required — next/image needs fixed dimensions, which would
+  // force a different ratio.
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -56,7 +56,7 @@ function SlideMedia({
       aria-hidden={!isActive}
       loading={isFirst ? "eager" : "lazy"}
       draggable={false}
-      className="absolute inset-0 h-full w-full object-contain"
+      className="absolute inset-0 h-full w-full object-cover object-center"
     />
   );
 }
@@ -177,9 +177,10 @@ export function Hero({
 
   return (
     <section
-      // Fixed responsive height: the box never grows/shrinks when slides
-      // change. Mobile ~300px, tablet ~400px, desktop ~480px.
-      className="relative h-[300px] w-full overflow-hidden bg-ink md:h-[400px] lg:h-[480px]"
+      // Full-viewport-width banner with fixed responsive height: the box
+      // never grows/shrinks when slides change.
+      // Mobile 450px, tablet 600px, desktop 720px.
+      className="relative h-[450px] w-full overflow-hidden bg-ink md:h-[600px] lg:h-[720px]"
       aria-roledescription="carousel"
       aria-label={`${name} — ${t(locale, "heroSlideshow")}`}
       onMouseEnter={handleEnter}
