@@ -70,6 +70,13 @@ export function MediaUploader({
 
         setStatus({ phase: "success", count: assets.length });
         onUploaded(assets);
+        // Clear only the temporary file selection so the next upload starts
+        // empty. Uploaded files stay in the library; the success message
+        // and category choice are preserved.
+        setFiles([]);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       } catch (error) {
         setStatus({
           phase: "error",

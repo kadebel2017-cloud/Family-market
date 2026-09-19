@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Hash,
@@ -40,12 +41,29 @@ export interface ProductFormProps {
 
 export function ProductForm({ action, categories, initial }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, {} as FormState);
+  const router = useRouter();
+  // Create mode only — edit forms must keep their values after save.
+  const isCreate = !initial;
+  const [mediaKey, setMediaKey] = useState(0);
   // USB/Bluetooth scanners behave like keyboards: focusing the input is
   // enough — scanned text appears automatically, no driver or library.
   const skuRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    // Reset ONLY after the server confirms creation. Validation/database
+    // errors keep the user's input so it can be fixed. Runs once per
+    // success: the updates below don't change `state`, so no loop.
+    if (isCreate && state.ok && !state.error) {
+      formRef.current?.reset();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMediaKey((key) => key + 1);
+      router.refresh();
+    }
+  }, [state, isCreate, router]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-6">
       {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
 
       <Fieldset
@@ -157,6 +175,7 @@ export function ProductForm({ action, categories, initial }: ProductFormProps) {
 
       <Fieldset legend="Média" icon={ImageIcon}>
         <MediaField
+          key={`media-${mediaKey}`}
           name="image"
           label="Image du produit"
           defaultValue={initial?.image}

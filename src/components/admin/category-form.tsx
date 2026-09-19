@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button, Input } from "@/components/ui";
 import type { FormState, MutationAction } from "@/lib/actions/types";
@@ -27,9 +28,26 @@ export interface CategoryFormProps {
 
 export function CategoryForm({ action, initial }: CategoryFormProps) {
   const [state, formAction, pending] = useActionState(action, {} as FormState);
+  const router = useRouter();
+  // Create mode only — edit forms must keep their values after save.
+  const isCreate = !initial;
+  const [mediaKey, setMediaKey] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    // Reset ONLY after the server confirms creation. Errors keep the
+    // user's input so it can be fixed. Runs once per success: the updates
+    // below don't change `state`, so no loop.
+    if (isCreate && state.ok && !state.error) {
+      formRef.current?.reset();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMediaKey((key) => key + 1);
+      router.refresh();
+    }
+  }, [state, isCreate, router]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-6">
       {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
 
       <Fieldset legend="Informations" description="Champs bilingues français / arabe.">
@@ -102,6 +120,7 @@ export function CategoryForm({ action, initial }: CategoryFormProps) {
 
       <Fieldset legend="Médias">
         <MediaField
+          key={`media-${mediaKey}`}
           name="image"
           label="Image de la catégorie"
           defaultValue={initial?.image}

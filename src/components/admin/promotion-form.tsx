@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Package, Percent, ScanLine, X } from "lucide-react";
 
 import { Button, Input } from "@/components/ui";
@@ -155,6 +156,12 @@ function ProductPicker({
 
 export function PromotionForm({ action, products, initial }: PromotionFormProps) {
   const [state, formAction, pending] = useActionState(action, {} as FormState);
+  const router = useRouter();
+  // Create mode only — edit forms must keep their values after save.
+  const isCreate = !initial;
+  const [mediaKey, setMediaKey] = useState(0);
+  const [pickerKey, setPickerKey] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const [offerType, setOfferType] = useState<PromotionType>(
     initial?.type ?? "PRODUCT_DISCOUNT",
   );
@@ -234,8 +241,27 @@ export function PromotionForm({ action, products, initial }: PromotionFormProps)
 
   const selectedIds = [...checked];
 
+  useEffect(() => {
+    // Reset EVERYTHING only after the server confirms creation: type,
+    // texts, dates, selected products, search, promo prices, quantities,
+    // pack price and media selection. Errors keep all entered data.
+    // The created promotion record itself is never touched. Runs once per
+    // success: the updates below don't change `state`, so no loop.
+    if (isCreate && state.ok && !state.error) {
+      formRef.current?.reset();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOfferType("PRODUCT_DISCOUNT");
+      setChecked(new Set());
+      setQuantities({});
+      setPackPrice("");
+      setMediaKey((key) => key + 1);
+      setPickerKey((key) => key + 1);
+      router.refresh();
+    }
+  }, [state, isCreate, router]);
+
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form ref={formRef} action={formAction} className="flex flex-col gap-6">
       {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
 
       <Fieldset legend="Type d'offre" description="Réduction sur produits ou pack groupé.">
@@ -358,7 +384,12 @@ export function PromotionForm({ action, products, initial }: PromotionFormProps)
           </p>
         ) : (
           <>
-            <ProductPicker products={products} checked={checked} onSelect={selectProduct} />
+            <ProductPicker
+              key={`picker-${pickerKey}`}
+              products={products}
+              checked={checked}
+              onSelect={selectProduct}
+            />
 
             {selectedIds.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -483,6 +514,7 @@ export function PromotionForm({ action, products, initial }: PromotionFormProps)
 
       <Fieldset legend="Médias">
         <MediaField
+          key={`media-${mediaKey}`}
           name="image"
           label="Image de la promotion"
           defaultValue={initial?.image}
