@@ -43,7 +43,9 @@ export function StoreLogo({
         <span
           className={cn(
             "truncate font-bold",
-            large ? "text-[1.35rem]" : "text-base",
+            // Mobile-only smaller text so the full name fits beside the
+            // logo; sm and up unchanged.
+            large ? "text-base sm:text-[1.35rem]" : "text-base",
             dark ? "text-white" : "text-foreground",
           )}
         >
@@ -68,7 +70,7 @@ export function StoreLogo({
       <span
         className={cn(
           "truncate font-bold",
-          large ? "text-2xl" : "text-base",
+          large ? "text-base sm:text-2xl" : "text-base",
           dark ? "text-white" : "text-foreground",
         )}
       >

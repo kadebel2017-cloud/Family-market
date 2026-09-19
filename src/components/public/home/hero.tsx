@@ -179,8 +179,8 @@ export function Hero({
     <section
       // Full-viewport-width banner with fixed responsive height: the box
       // never grows/shrinks when slides change.
-      // Mobile 520px, tablet 700px, desktop 950px.
-      className="relative h-[520px] w-full overflow-hidden bg-ink md:h-[700px] lg:h-[950px]"
+      // Mobile 380px, tablet 700px, desktop 950px.
+      className="relative h-[380px] w-full overflow-hidden bg-ink md:h-[700px] lg:h-[950px]"
       aria-roledescription="carousel"
       aria-label={`${name} — ${t(locale, "heroSlideshow")}`}
       onMouseEnter={handleEnter}
