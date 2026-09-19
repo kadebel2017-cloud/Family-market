@@ -17,6 +17,7 @@ import { safeExternalUrl, safeTelHref, whatsAppHref } from "@/lib/public/site";
 import type { NavigationItem } from "@/types";
 import type { Locale } from "@/types";
 import type { PublicSettings } from "@/lib/public/queries";
+import { FacebookIcon } from "./facebook-icon";
 import { storeName, StoreLogo } from "./store-logo";
 
 const SOCIAL_LABELS: {
@@ -81,7 +82,11 @@ export function SiteFooter({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/80 transition-colors hover:border-gold-400 hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    {key === "facebookUrl" ? (
+                      <FacebookIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    )}
                     {label}
                   </a>
                 </li>

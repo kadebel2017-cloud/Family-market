@@ -10,6 +10,7 @@ import { t, pickLocalized } from "@/lib/i18n/translations";
 import { safeExternalUrl, safeTelHref, whatsAppHref } from "@/lib/public/site";
 import type { PublicSettings } from "@/lib/public/queries";
 import type { Locale } from "@/types";
+import { FacebookIcon } from "../facebook-icon";
 import { SectionHeader } from "./section-header";
 
 const SOCIAL_LABELS: {
@@ -138,7 +139,11 @@ export function ContactSection({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-gold-500 hover:text-gold-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    {key === "facebookUrl" ? (
+                      <FacebookIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                    )}
                     {label}
                   </a>
                 </li>
