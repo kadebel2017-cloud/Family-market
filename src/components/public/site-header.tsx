@@ -73,20 +73,20 @@ export function SiteHeader({
         <Link
           href="/"
           aria-label={storeName(settings, locale)}
-          className="min-w-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+          className="shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
         >
           <StoreLogo settings={settings} locale={locale} size="lg" />
         </Link>
 
         <NavLinks items={navItems} />
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
           <form
             action="/products"
             role="search"
-            className="hidden sm:block"
+            className="hidden min-w-0 flex-1 justify-end sm:flex"
           >
-            <div className="flex items-center gap-1.5 rounded-md border border-black/10 bg-white p-1 ps-2.5 transition-shadow focus-within:ring-2 focus-within:ring-gold-500">
+            <div className="flex w-full max-w-44 items-center gap-1.5 rounded-md border border-black/10 bg-white p-1 ps-2.5 transition-shadow focus-within:ring-2 focus-within:ring-gold-500 md:max-w-56 lg:max-w-72">
               <Search
                 className="h-4 w-4 shrink-0 text-muted-foreground"
                 aria-hidden
@@ -99,7 +99,7 @@ export function SiteHeader({
                 name="q"
                 type="search"
                 placeholder={t(locale, "searchPlaceholder")}
-                className="h-7 w-44 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none md:w-56 lg:w-72"
+                className="h-7 w-full min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
           </form>

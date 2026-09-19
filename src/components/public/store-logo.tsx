@@ -28,7 +28,7 @@ export function StoreLogo({
 
   if (settings?.logoImage) {
     return (
-      <span className={cn("flex min-w-0 items-center", large ? "gap-3" : "gap-2.5")}>
+      <span className={cn("flex items-center", large ? "gap-3" : "min-w-0 gap-2.5")}>
         <Image
           src={settings.logoImage}
           alt=""
@@ -42,7 +42,8 @@ export function StoreLogo({
         />
         <span
           className={cn(
-            "truncate font-bold",
+            // Header brand is never truncated: one line, always full text.
+            large ? "whitespace-nowrap font-bold" : "truncate font-bold",
             // Mobile-only smaller text so the full name fits beside the
             // logo; sm and up unchanged.
             large ? "text-base sm:text-[1.35rem]" : "text-base",
@@ -56,7 +57,7 @@ export function StoreLogo({
   }
 
   return (
-    <span className={cn("flex min-w-0 items-center", large ? "gap-3" : "gap-2.5")}>
+    <span className={cn("flex items-center", large ? "gap-3" : "min-w-0 gap-2.5")}>
       <span
         aria-hidden
         className={cn(
@@ -69,7 +70,7 @@ export function StoreLogo({
       </span>
       <span
         className={cn(
-          "truncate font-bold",
+          large ? "whitespace-nowrap font-bold" : "truncate font-bold",
           large ? "text-base sm:text-2xl" : "text-base",
           dark ? "text-white" : "text-foreground",
         )}
