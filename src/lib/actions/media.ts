@@ -26,6 +26,10 @@ async function findReferenceCount(url: string): Promise<number> {
   return products + categories + promotions;
 }
 
+async function findHeroUsage(assetId: string): Promise<number> {
+  return db.heroSlide.count({ where: { mediaId: assetId } });
+}
+
 export async function deleteMediaAsset(
   prev: FormState,
   formData: FormData,
@@ -45,6 +49,14 @@ export async function deleteMediaAsset(
     return {
       error:
         "Ce média est utilisé par un produit, une catégorie ou une promotion. Retirez-le d'abord de ces éléments.",
+    };
+  }
+
+  const heroUsage = await findHeroUsage(asset.id);
+  if (heroUsage > 0) {
+    return {
+      error:
+        "Ce média est utilisé dans le Hero. Retirez-le d'abord du Hero (Paramètres → Hero Media).",
     };
   }
 

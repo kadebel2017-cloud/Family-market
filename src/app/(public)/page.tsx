@@ -43,8 +43,7 @@ export default async function HomePage() {
     <>
       <Hero
         settings={data.settings}
-        heroVideo={data.heroVideo}
-        heroImage={data.heroImage}
+        slides={data.heroSlides}
         locale={locale}
       />
       <PromotionsSection promotions={data.promotions} locale={locale} />

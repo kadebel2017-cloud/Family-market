@@ -153,6 +153,26 @@ model StoreSettings {
 }
 
 // ---------------------------------------------------------------
+// Hero slideshow
+// ---------------------------------------------------------------
+
+// Ordered usage of MediaAsset records for the homepage hero.
+// The file itself stays in MediaAsset — HeroSlide is only the
+// usage/order relationship. Unlimited HeroSlide rows may exist,
+// but at most 10 may have isActive = true (enforced in app logic).
+model HeroSlide {
+  id        String     @id @default(cuid())
+  mediaId   String     @unique
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+// ---------------------------------------------------------------
 // Media
 // ---------------------------------------------------------------
 
@@ -168,6 +188,7 @@ model MediaAsset {
   altAr     String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
+  heroSlides HeroSlide[]
 
   @@index([type])
   @@index([category])

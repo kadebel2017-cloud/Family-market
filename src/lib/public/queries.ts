@@ -66,8 +66,22 @@ export interface HeroMedia {
   altAr: string | null;
 }
 
+export interface HeroSlidePublic {
+  id: string;
+  mediaId: string;
+  name: string;
+  url: string;
+  type: "image" | "video";
+  altFr: string | null;
+  altAr: string | null;
+  sortOrder: number;
+}
+
+export const MAX_PUBLIC_HERO_SLIDES = 10;
+
 export interface PublicHomeData {
   settings: PublicSettings | null;
+  heroSlides: HeroSlidePublic[];
   heroVideo: HeroMedia | null;
   heroImage: HeroMedia | null;
   categories: CategoryCard[];
@@ -233,13 +247,54 @@ export async function getSettings(): Promise<PublicSettings | null> {
   }, null);
 }
 
+export async function getHeroSlides(): Promise<HeroSlidePublic[]> {
+  return safePublic(async () => {
+    const slides = await db.heroSlide.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      take: MAX_PUBLIC_HERO_SLIDES,
+      include: { media: true },
+    });
+    return slides.map((slide) => ({
+      id: slide.id,
+      mediaId: slide.mediaId,
+      name: slide.media.name,
+      url: slide.media.url,
+      type: slide.media.type,
+      altFr: slide.media.altFr,
+      altAr: slide.media.altAr,
+      sortOrder: slide.sortOrder,
+    }));
+  }, []);
+}
+
 export async function getHomeHero(
   heroMediaUrl?: string | null,
 ): Promise<{
+  heroSlides: HeroSlidePublic[];
   heroVideo: HeroMedia | null;
   heroImage: HeroMedia | null;
 }> {
   return safePublic(async () => {
+    // New source of truth: active HeroSlides ordered by sortOrder.
+    const slides = await getHeroSlides();
+    if (slides.length > 0) {
+      const toHero = (slide: HeroSlidePublic): HeroMedia => ({
+        id: slide.mediaId,
+        name: slide.name,
+        url: slide.url,
+        type: slide.type,
+        altFr: slide.altFr,
+        altAr: slide.altAr,
+      });
+      return {
+        heroSlides: slides,
+        heroVideo: slides.find((s) => s.type === "video") ? toHero(slides.find((s) => s.type === "video")!) : null,
+        heroImage: slides.find((s) => s.type === "image") ? toHero(slides.find((s) => s.type === "image")!) : null,
+      };
+    }
+    // Legacy fallback: explicit StoreSettings.heroMedia + HERO category assets.
+    // Kept for backward compatibility when no HeroSlide exists yet.
     const [assets, explicit] = await Promise.all([
       db.mediaAsset.findMany({
         where: { category: "HERO" },
@@ -266,11 +321,26 @@ export async function getHomeHero(
       altFr: asset.altFr,
       altAr: asset.altAr,
     });
+    const toSlide = (asset: (typeof assets)[number]): HeroSlidePublic => ({
+      id: asset.id,
+      mediaId: asset.id,
+      name: asset.name,
+      url: asset.url,
+      type: asset.type,
+      altFr: asset.altFr,
+      altAr: asset.altAr,
+      sortOrder: 0,
+    });
+    const legacySlides = [heroVideo, heroImage]
+      .filter((a): a is (typeof assets)[number] => a !== null)
+      .filter((a, i, arr) => arr.findIndex((b) => b.id === a.id) === i)
+      .map(toSlide);
     return {
+      heroSlides: legacySlides,
       heroVideo: heroVideo ? toHero(heroVideo) : null,
       heroImage: heroImage ? toHero(heroImage) : null,
     };
-  }, { heroVideo: null, heroImage: null });
+  }, { heroSlides: [], heroVideo: null, heroImage: null });
 }
 
 export async function getHomeData(): Promise<PublicHomeData> {
@@ -312,6 +382,7 @@ export async function getHomeData(): Promise<PublicHomeData> {
 
   return {
     settings,
+    heroSlides: hero.heroSlides,
     heroVideo: hero.heroVideo,
     heroImage: hero.heroImage,
     categories: categories.map((category) => ({
