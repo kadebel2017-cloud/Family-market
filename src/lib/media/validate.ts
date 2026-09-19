@@ -1,12 +1,7 @@
 import "server-only";
 
 import { slugify } from "@/lib/admin/format";
-import {
-  ALLOWED_IMAGE_EXTENSIONS,
-  ALLOWED_VIDEO_EXTENSIONS,
-  MAX_IMAGE_SIZE_BYTES,
-  MAX_VIDEO_SIZE_BYTES,
-} from "./config";
+import { MAX_IMAGE_SIZE_BYTES, MAX_VIDEO_SIZE_BYTES } from "./config";
 import type { MediaType } from "./types";
 
 export interface ValidatedMediaFile {
@@ -28,6 +23,20 @@ const MIME_BY_EXTENSION: Record<string, string> = {
   ".mp4": "video/mp4",
   ".webm": "video/webm",
   ".mov": "video/quicktime",
+};
+
+// Canonical extension for each detectable format: when the filename lies
+// (e.g. a Facebook download serving WEBP content named ".png"), the file is
+// saved with the extension matching its REAL content.
+const EXTENSION_BY_MIME: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
 };
 
 const IMAGE_MIME_TYPES = new Set([
@@ -115,8 +124,14 @@ export function sniffMimeType(bytes: Uint8Array): string | null {
   return null;
 }
 
-function extensionMatches(mimeType: string, extension: string): boolean {
-  return MIME_BY_EXTENSION[extension.toLowerCase()] === mimeType;
+function resolveExtension(filenameExtension: string, mimeType: string): string {
+  // The filename extension is only kept when it agrees with the sniffed
+  // content (preserves ".jpeg" vs ".jpg" and ".mov" choices). Otherwise the
+  // real format wins — a WEBP file named ".png" is saved as ".webp".
+  if (MIME_BY_EXTENSION[filenameExtension.toLowerCase()] === mimeType) {
+    return filenameExtension.toLowerCase();
+  }
+  return EXTENSION_BY_MIME[mimeType] ?? filenameExtension.toLowerCase();
 }
 
 function sanitizeBaseName(filename: string): string {
@@ -131,36 +146,21 @@ export async function validateMediaFile(
   const originalName = file.name || "fichier";
   const lower = originalName.toLowerCase();
   const parts = lower.split(".");
-  const extension = parts.length > 1 ? "." + (parts.pop() ?? "") : "";
-  const allowedExtensions = [
-    ...ALLOWED_IMAGE_EXTENSIONS,
-    ...ALLOWED_VIDEO_EXTENSIONS,
-  ] as readonly string[];
-
-  if (!allowedExtensions.includes(extension)) {
-    return {
-      ok: false,
-      error: `Le format « ${extension || "inconnu"} » n'est pas accepté (images : jpg, png, gif, webp, avif — vidéos : mp4, webm, mov).`,
-    };
-  }
+  const filenameExtension = parts.length > 1 ? "." + (parts.pop() ?? "") : "";
 
   if (file.size <= 0) {
     return { ok: false, error: `« ${originalName} » est vide.` };
   }
 
+  // The REAL format comes from the magic bytes, never from the filename or
+  // the client-provided Content-Type. Unknown content is rejected here, so
+  // fake / non-image files can never pass validation.
   const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
   const mimeType = sniffMimeType(head);
   if (!mimeType) {
     return {
       ok: false,
       error: `« ${originalName} » n'est pas un fichier image ou vidéo valide.`,
-    };
-  }
-
-  if (!extensionMatches(mimeType, extension)) {
-    return {
-      ok: false,
-      error: `« ${originalName} » ne correspond pas au format de son contenu réel.`,
     };
   }
 
@@ -173,6 +173,8 @@ export async function validateMediaFile(
       error: `« ${originalName} » dépasse la limite de ${limitMo} Mo pour les ${type === "image" ? "images" : "vidéos"}.`,
     };
   }
+
+  const extension = resolveExtension(filenameExtension, mimeType);
 
   return {
     ok: true,
