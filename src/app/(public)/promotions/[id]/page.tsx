@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarClock, ChevronLeft } from "lucide-react";
@@ -85,15 +84,16 @@ export default async function PromotionDetailPage({
       </Link>
 
       <article className="mt-4 overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm">
-        <div className="relative aspect-[16/7] overflow-hidden bg-black/5">
+        <div className="overflow-hidden bg-black/5">
           {promotion.image ? (
-            <Image
+            // Full original image, same as the homepage promotion cards:
+            // natural ratio, full width, auto height — never cropped.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={promotion.image}
               alt={title}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 80vw"
-              className="object-cover"
+              draggable={false}
+              className="block h-auto w-full"
             />
           ) : (
             <ImageFallback kind="promotion" iconClassName="h-14 w-14" />
