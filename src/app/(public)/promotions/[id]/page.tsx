@@ -106,10 +106,7 @@ export default async function PromotionDetailPage({
               <CalendarClock className="h-4 w-4" aria-hidden />
               <span>
                 {t(locale, "promotionStarts")}{" "}
-                {formatPublicDate(locale, promotion.startDate)}
-              </span>
-              <span aria-hidden>,</span>
-              <span>
+                {formatPublicDate(locale, promotion.startDate)}{" "}
                 {t(locale, "promotionEnds")}{" "}
                 {formatPublicDate(locale, promotion.endDate)}
               </span>
