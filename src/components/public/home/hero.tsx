@@ -33,11 +33,7 @@ function SlideMedia({
     return (
       <video
         ref={videoRef}
-        className={
-          isActive
-            ? "block h-auto w-full"
-            : "absolute inset-0 h-full w-full object-contain"
-        }
+        className="absolute inset-0 h-full w-full object-contain"
         src={slide.url}
         muted
         loop
@@ -49,9 +45,9 @@ function SlideMedia({
     );
   }
 
-  // Full image, never cropped: natural aspect ratio, full width, auto height.
-  // Plain <img> is required — next/image needs fixed dimensions, which would
-  // force a cropping ratio.
+  // Full image, never cropped: fitted inside the fixed hero box, original
+  // aspect ratio preserved. Plain <img> is required — next/image needs fixed
+  // dimensions, which would force a cropping ratio.
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -60,11 +56,7 @@ function SlideMedia({
       aria-hidden={!isActive}
       loading={isFirst ? "eager" : "lazy"}
       draggable={false}
-      className={
-        isActive
-          ? "block h-auto w-full object-contain"
-          : "absolute inset-0 h-full w-full object-contain"
-      }
+      className="absolute inset-0 h-full w-full object-contain"
     />
   );
 }
@@ -185,7 +177,9 @@ export function Hero({
 
   return (
     <section
-      className="relative w-full overflow-hidden bg-ink"
+      // Fixed responsive height: the box never grows/shrinks when slides
+      // change. Mobile ~300px, tablet ~400px, desktop ~480px.
+      className="relative h-[300px] w-full overflow-hidden bg-ink md:h-[400px] lg:h-[480px]"
       aria-roledescription="carousel"
       aria-label={`${name} — ${t(locale, "heroSlideshow")}`}
       onMouseEnter={handleEnter}
@@ -207,11 +201,12 @@ export function Hero({
         return (
           <div
             key={slide.id}
+            // Every slide fills the same fixed box, so switching images
+            // never changes the section height.
             className={cn(
-              // The active slide sets the section height from the image's
-              // natural ratio; inactive slides overlay it for the fade.
-              isActive ? "relative z-10 w-full opacity-100" : "pointer-events-none absolute inset-0 z-0 opacity-0",
+              "absolute inset-0",
               !reduceMotion && "transition-opacity duration-500",
+              isActive ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0",
             )}
             aria-hidden={!isActive}
           >
