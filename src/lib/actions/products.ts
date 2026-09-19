@@ -21,6 +21,21 @@ import type { FormState } from "./types";
 
 const ADMIN_PRODUCTS_PATH = "/admin/products";
 
+async function findSkuConflict(
+  sku: string,
+  excludeId?: string,
+): Promise<{ nameFr: string; size: string } | null> {
+  return db.product.findFirst({
+    where: { sku, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    select: { nameFr: true, size: true },
+  });
+}
+
+function skuConflictMessage(conflict: { nameFr: string; size: string }): string {
+  const label = [conflict.nameFr, conflict.size].filter(Boolean).join(" ");
+  return `Ce code-barres est déjà utilisé par : ${label}.`;
+}
+
 export async function createProduct(
   _prev: FormState,
   formData: FormData,
@@ -53,6 +68,14 @@ export async function createProduct(
   const categoryId = parseId(formData.get("categoryId"));
   if (!categoryId.ok) return { error: categoryId.error };
 
+  const sku = optionalText(formData, "sku");
+  if (sku) {
+    const conflict = await findSkuConflict(sku);
+    if (conflict) {
+      return { error: skuConflictMessage(conflict) };
+    }
+  }
+
   try {
     await db.product.create({
       data: {
@@ -62,7 +85,7 @@ export async function createProduct(
         descriptionFr: optionalText(formData, "descriptionFr"),
         descriptionAr: optionalText(formData, "descriptionAr"),
         size: size.value,
-        sku: optionalText(formData, "sku"),
+        sku,
         price: price.value,
         salePrice: salePrice.value,
         image: optionalText(formData, "image"),
@@ -116,6 +139,14 @@ export async function updateProduct(
   const categoryId = parseId(formData.get("categoryId"));
   if (!categoryId.ok) return { error: categoryId.error };
 
+  const sku = optionalText(formData, "sku");
+  if (sku) {
+    const conflict = await findSkuConflict(sku, id.value);
+    if (conflict) {
+      return { error: skuConflictMessage(conflict) };
+    }
+  }
+
   try {
     await db.product.update({
       where: { id: id.value },
@@ -126,7 +157,7 @@ export async function updateProduct(
         descriptionFr: optionalText(formData, "descriptionFr"),
         descriptionAr: optionalText(formData, "descriptionAr"),
         size: size.value,
-        sku: optionalText(formData, "sku"),
+        sku,
         price: price.value,
         salePrice: salePrice.value,
         image: optionalText(formData, "image"),

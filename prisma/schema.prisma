@@ -35,6 +35,11 @@ enum MediaCategory {
   OTHER
 }
 
+enum PromotionType {
+  PRODUCT_DISCOUNT
+  PACK
+}
+
 // ---------------------------------------------------------------
 // Admin
 // ---------------------------------------------------------------
@@ -78,7 +83,9 @@ model Product {
   descriptionFr String?
   descriptionAr String?
   size          String
-  sku           String?
+  // Optional barcode. Unique when present — PostgreSQL unique
+  // constraints ignore NULL, so products without a barcode are unaffected.
+  sku           String?          @unique
   price         Decimal            @db.Decimal(10, 2)
   salePrice     Decimal?           @db.Decimal(10, 2)
   image         String?
@@ -106,6 +113,12 @@ model Promotion {
   startDate     DateTime
   endDate       DateTime
   isActive      Boolean            @default(true)
+  // Offer type. Existing rows default to PRODUCT_DISCOUNT so legacy
+  // promotions keep working unchanged.
+  type          PromotionType      @default(PRODUCT_DISCOUNT)
+  // Total promotional price for PACK offers. Null for PRODUCT_DISCOUNT.
+  // Product.price is never modified — the pack price lives here.
+  packPrice     Decimal?           @db.Decimal(10, 2)
   products      PromotionProduct[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
@@ -118,6 +131,11 @@ model Promotion {
 model PromotionProduct {
   promotionId String
   productId   String
+  // Quantity of this product inside a PACK (always 1 for PRODUCT_DISCOUNT).
+  quantity    Int      @default(1)
+  // Per-product promotional price for PRODUCT_DISCOUNT offers.
+  // Null = no special price (normal Product.price applies).
+  promoPrice  Decimal? @db.Decimal(10, 2)
   promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 

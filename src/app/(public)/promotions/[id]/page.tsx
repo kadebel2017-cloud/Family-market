@@ -6,7 +6,7 @@ import { CalendarClock, ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getLocale } from "@/lib/i18n/locale";
 import { t, pickLocalized } from "@/lib/i18n/translations";
-import { formatPublicDate } from "@/lib/public/format";
+import { formatPrice, formatPublicDate } from "@/lib/public/format";
 import { getPromotionById } from "@/lib/public/queries";
 import { ProductGridCard } from "@/components/public/catalog/product-card";
 import { ImageFallback } from "@/components/public/image-fallback";
@@ -72,6 +72,7 @@ export default async function PromotionDetailPage({
     promotion.descriptionAr,
   );
   const status = statusBadge[promotion.status];
+  const isPack = promotion.type === "PACK";
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -123,7 +124,67 @@ export default async function PromotionDetailPage({
         </div>
       </article>
 
-      {promotion.products.length > 0 ? (
+      {isPack ? (
+        <section
+          aria-labelledby="pack-contents-title"
+          className="mt-10"
+        >
+          <h2
+            id="pack-contents-title"
+            className="text-xl font-bold text-foreground"
+          >
+            {t(locale, "packContentsLabel")}
+          </h2>
+          <div className="mt-5 overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm">
+            <ul className="divide-y divide-black/10">
+              {promotion.packLines.map((line) => {
+                const lineName = pickLocalized(locale, line.nameFr, line.nameAr);
+                return (
+                  <li
+                    key={line.productId}
+                    className="flex items-center justify-between gap-3 px-5 py-3"
+                  >
+                    <span className="text-sm font-medium text-foreground">
+                      {lineName} × {line.quantity}
+                    </span>
+                    <span className="shrink-0 text-sm text-muted-foreground">
+                      {formatPrice(locale, line.lineTotal)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            {promotion.normalTotal !== null && promotion.packPrice !== null ? (
+              <dl className="flex flex-col gap-1.5 border-t-2 border-gold-500 bg-gold-50/60 px-5 py-4">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <dt className="text-muted-foreground">{t(locale, "normalTotalLabel")}</dt>
+                  <dd className="font-medium text-foreground line-through">
+                    {formatPrice(locale, promotion.normalTotal)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-sm font-semibold text-foreground">
+                    {t(locale, "packPriceLabel")}
+                  </dt>
+                  <dd className="text-xl font-bold text-gold-600">
+                    {formatPrice(locale, promotion.packPrice)}
+                  </dd>
+                </div>
+                {promotion.packSavings !== null ? (
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <dt className="font-medium text-emerald-700">{t(locale, "savingsLabel")}</dt>
+                    <dd className="font-bold text-emerald-700">
+                      {formatPrice(locale, promotion.packSavings)}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {!isPack && promotion.products.length > 0 ? (
         <section
           aria-labelledby="related-products-title"
           className="mt-10"

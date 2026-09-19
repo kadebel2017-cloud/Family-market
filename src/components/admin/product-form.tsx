@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import {
   CheckCircle2,
   Hash,
   Image as ImageIcon,
   Package,
+  ScanLine,
   Tag,
 } from "lucide-react";
 
@@ -39,6 +40,9 @@ export interface ProductFormProps {
 
 export function ProductForm({ action, categories, initial }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, {} as FormState);
+  // USB/Bluetooth scanners behave like keyboards: focusing the input is
+  // enough — scanned text appears automatically, no driver or library.
+  const skuRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
@@ -190,14 +194,34 @@ export function ProductForm({ action, categories, initial }: ProductFormProps) {
           <Field
             label="SKU / Code-barres"
             htmlFor="sku"
-            hint="Référence interne."
+            hint="Scannez ou saisissez le code-barres. Référence interne."
           >
-            <Input
-              id="sku"
-              name="sku"
-              defaultValue={initial?.sku ?? ""}
-              placeholder="FM-JAV-1000"
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                ref={skuRef}
+                id="sku"
+                name="sku"
+                defaultValue={initial?.sku ?? ""}
+                placeholder="Ex : 6131234567890"
+                className="flex-1"
+                onKeyDown={(e) => {
+                  // Scanners often send Enter after the code: keep the value
+                  // without accidentally submitting the whole form.
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => skuRef.current?.focus()}
+              >
+                <ScanLine className="h-4 w-4" aria-hidden />
+                Scanner
+              </Button>
+            </div>
           </Field>
         </div>
       </Fieldset>

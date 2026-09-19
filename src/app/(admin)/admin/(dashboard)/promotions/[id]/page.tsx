@@ -33,7 +33,9 @@ export default async function AdminPromotionEditPage({
       startDate: true,
       endDate: true,
       isActive: true,
-      products: { select: { productId: true } },
+      type: true,
+      packPrice: true,
+      products: { select: { productId: true, quantity: true, promoPrice: true } },
     },
   });
 
@@ -45,7 +47,7 @@ export default async function AdminPromotionEditPage({
     () =>
       db.product.findMany({
         orderBy: { nameFr: "asc" },
-        select: { id: true, nameFr: true },
+        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true },
       }),
     [],
   );
@@ -60,7 +62,14 @@ export default async function AdminPromotionEditPage({
     startDate: toDatetimeLocal(promotion.startDate),
     endDate: toDatetimeLocal(promotion.endDate),
     isActive: promotion.isActive,
+    type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
+    packPrice: promotion.packPrice?.toFixed(2) ?? null,
     productIds: promotion.products.map((product) => product.productId),
+    items: promotion.products.map((product) => ({
+      productId: product.productId,
+      quantity: product.quantity,
+      promoPrice: product.promoPrice?.toFixed(2) ?? null,
+    })),
   };
 
   return (
@@ -69,7 +78,14 @@ export default async function AdminPromotionEditPage({
         title="Modifier la promotion"
         description={promotion.titleFr}
       />
-      <PromotionForm action={updatePromotion} products={products} initial={initial} />
+      <PromotionForm
+        action={updatePromotion}
+        products={products.map((product) => ({
+          ...product,
+          price: product.price.toFixed(2),
+        }))}
+        initial={initial}
+      />
     </div>
   );
 }

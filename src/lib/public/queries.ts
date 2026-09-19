@@ -2,6 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
+import { calcPackTotals, formatDecimal } from "@/lib/promotions";
 import type { Locale } from "@/types";
 
 export interface PublicSettings {
@@ -42,6 +43,8 @@ export interface PromotionCard {
   image: string | null;
   startDate: string;
   endDate: string;
+  type: "PRODUCT_DISCOUNT" | "PACK";
+  packPrice: string | null;
 }
 
 export interface ProductCard {
@@ -133,9 +136,22 @@ export interface ProductsPageResult {
 
 export type PromotionStatus = "active" | "scheduled" | "expired";
 
+export interface PromotionPackLine {
+  productId: string;
+  nameFr: string;
+  nameAr: string;
+  image: string | null;
+  unitPrice: string;
+  quantity: number;
+  lineTotal: string;
+}
+
 export interface PromotionDetail extends PromotionCard {
   status: PromotionStatus;
   products: ProductCard[];
+  packLines: PromotionPackLine[];
+  normalTotal: string | null;
+  packSavings: string | null;
 }
 
 const PUBLIC_PAGE_SIZE = 12;
@@ -196,6 +212,8 @@ function toPromotionCard(promotion: {
   image: string | null;
   startDate: Date;
   endDate: Date;
+  type: string;
+  packPrice: DecimalLike | null;
 }): PromotionCard {
   return {
     id: promotion.id,
@@ -206,6 +224,8 @@ function toPromotionCard(promotion: {
     image: promotion.image,
     startDate: promotion.startDate.toISOString(),
     endDate: promotion.endDate.toISOString(),
+    type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
+    packPrice: promotion.packPrice?.toFixed(2) ?? null,
   };
 }
 
@@ -403,6 +423,8 @@ export async function getHomeData(): Promise<PublicHomeData> {
       image: promotion.image,
       startDate: promotion.startDate.toISOString(),
       endDate: promotion.endDate.toISOString(),
+      type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
+      packPrice: promotion.packPrice?.toFixed(2) ?? null,
     })),
     products: products.map((product) => ({
       id: product.id,
@@ -624,11 +646,45 @@ export async function getPromotionById(
         : now > promotion.endDate
           ? "expired"
           : "active";
+    const isPack = promotion.type === "PACK";
+    // Promotion-level override only: Product.price rows are never modified.
     const products = promotion.products
-      .map((link) => link.product)
-      .filter((product) => product.isAvailable)
-      .map(toProductCard);
-    return { ...toPromotionCard(promotion), status, products };
+      .map((link) => ({ link, product: link.product }))
+      .filter(({ product }) => product.isAvailable)
+      .map(({ link, product }) => {
+        const card = toProductCard(product);
+        if (!isPack && link.promoPrice !== null) {
+          card.salePrice = link.promoPrice.toFixed(2);
+        }
+        return card;
+      });
+    const packLines: PromotionPackLine[] = isPack
+      ? promotion.products
+          .filter((link) => link.product.isAvailable)
+          .map((link) => ({
+            productId: link.productId,
+            nameFr: link.product.nameFr,
+            nameAr: link.product.nameAr,
+            image: link.product.image,
+            unitPrice: link.product.price.toFixed(2),
+            quantity: link.quantity,
+            lineTotal: link.product.price.mul(link.quantity).toFixed(2),
+          }))
+      : [];
+    let normalTotal: string | null = null;
+    let packSavings: string | null = null;
+    if (isPack && promotion.packPrice !== null && packLines.length > 0) {
+      const totals = calcPackTotals(
+        packLines.map((line) => ({
+          unitPrice: line.unitPrice,
+          quantity: line.quantity,
+        })),
+        promotion.packPrice,
+      );
+      normalTotal = formatDecimal(totals.normalTotal);
+      packSavings = formatDecimal(totals.savings);
+    }
+    return { ...toPromotionCard(promotion), status, products, packLines, normalTotal, packSavings };
   }, null);
 }
 

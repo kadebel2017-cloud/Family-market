@@ -18,7 +18,7 @@ export default async function AdminPromotionNewPage() {
     () =>
       db.product.findMany({
         orderBy: { nameFr: "asc" },
-        select: { id: true, nameFr: true },
+        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true },
       }),
     [],
   );
@@ -29,7 +29,13 @@ export default async function AdminPromotionNewPage() {
         title="Nouvelle promotion"
         description="Définissez une offre sur un ou plusieurs produits."
       />
-      <PromotionForm action={createPromotion} products={products} />
+      <PromotionForm
+        action={createPromotion}
+        products={products.map((product) => ({
+          ...product,
+          price: product.price.toFixed(2),
+        }))}
+      />
     </div>
   );
 }

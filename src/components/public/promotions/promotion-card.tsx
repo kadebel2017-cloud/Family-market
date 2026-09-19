@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Package } from "lucide-react";
 
 import { t, pickLocalized } from "@/lib/i18n/translations";
-import { formatPublicDate } from "@/lib/public/format";
+import { formatPublicDate, formatPrice } from "@/lib/public/format";
 import { cn } from "@/lib/utils";
 import type { PromotionCard as PromotionCardData } from "@/lib/public/queries";
 import type { Locale } from "@/types";
@@ -68,6 +68,7 @@ export function PromotionCard({
   );
   const status = promotionStatus(now, promotion.startDate, promotion.endDate);
   const Title = titleLevel;
+  const isPack = promotion.type === "PACK";
 
   return (
     <Link
@@ -111,6 +112,17 @@ export function PromotionCard({
             <span aria-hidden>{STATUS_DOT[status]}</span>
             {t(locale, STATUS_LABEL_KEY[status])}
           </span>
+          {isPack && promotion.packPrice !== null ? (
+            <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white">
+                <Package className="h-3.5 w-3.5" aria-hidden />
+                {t(locale, "packLabel")}
+              </span>
+              <span className="text-lg font-bold text-gold-600">
+                {formatPrice(locale, promotion.packPrice)}
+              </span>
+            </p>
+          ) : null}
           <p className="inline-flex items-start gap-1.5 text-sm font-medium text-foreground">
             <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" aria-hidden />
             <span>

@@ -31,6 +31,8 @@ async function dbPromotionList() {
       id: true,
       titleFr: true,
       titleAr: true,
+      type: true,
+      packPrice: true,
       startDate: true,
       endDate: true,
       isActive: true,
@@ -68,10 +70,11 @@ export default async function AdminPromotionsPage() {
         </EmptyState>
       ) : (
         <div className="overflow-hidden rounded-lg border border-black/10">
-          <Table className="min-w-[760px]">
+          <Table className="min-w-[860px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Titre</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Produits</TableHead>
                 <TableHead>Période</TableHead>
                 <TableHead>Statut</TableHead>
@@ -88,6 +91,20 @@ export default async function AdminPromotionsPage() {
                       <div dir="rtl" className="text-sm text-muted-foreground">
                         {promotion.titleAr}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {promotion.type === "PACK" ? (
+                        <span>
+                          Pack
+                          {promotion.packPrice !== null ? (
+                            <span className="block text-xs text-muted-foreground">
+                              {promotion.packPrice.toFixed(2)} DA
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : (
+                        "Réduction"
+                      )}
                     </TableCell>
                     <TableCell>{promotion._count.products}</TableCell>
                     <TableCell>
