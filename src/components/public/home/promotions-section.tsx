@@ -45,7 +45,7 @@ export function PromotionsSection({
             promotion={promotion}
             locale={locale}
             now={now}
-            href="/promotions"
+            href={`/promotions/${promotion.id}`}
           />
         ))}
       </div>
