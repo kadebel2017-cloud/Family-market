@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { Phone, Search } from "lucide-react";
+import { Clock, Phone, Search } from "lucide-react";
 
 import { t } from "@/lib/i18n/translations";
+import { formatTimeRange, isOpenNow } from "@/lib/public/schedule";
 import { safeTelHref } from "@/lib/public/site";
+import { cn } from "@/lib/utils";
 import type { NavigationItem } from "@/types";
 import type { PublicSettings } from "@/lib/public/queries";
 import type { Locale } from "@/types";
@@ -28,26 +30,84 @@ export function SiteHeader({
   ];
 
   const phoneHref = safeTelHref(settings?.phone);
+  const openingRange = settings
+    ? formatTimeRange(settings.openingTime, settings.closingTime)
+    : "08:00 – 23:00";
+  const isOpen = settings?.isOpenAutomatically
+    ? isOpenNow(new Date(), {
+        openingTime: settings.openingTime,
+        closingTime: settings.closingTime,
+      })
+    : true;
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/10 bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="border-b border-black/5 bg-gold-50/70">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-1.5 text-xs font-medium text-black sm:text-[13px]">
+          <span className="inline-flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 shrink-0 text-gold-600" aria-hidden />
+            <span>
+              {t(locale, "everyDay")} : {openingRange}
+            </span>
+          </span>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+              isOpen
+                ? "bg-emerald-100 text-emerald-800"
+                : "bg-red-100 text-red-800",
+            )}
+          >
+            <span
+              aria-hidden
+              className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                isOpen ? "bg-emerald-500" : "bg-red-500",
+              )}
+            />
+            {isOpen ? t(locale, "storeOpen") : t(locale, "storeClosed")}
+          </span>
+        </div>
+      </div>
+      <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-4 pe-4 ps-0 sm:pe-6 lg:pe-8">
         <Link
           href="/"
           aria-label={storeName(settings, locale)}
           className="min-w-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
         >
-          <StoreLogo settings={settings} locale={locale} />
+          <StoreLogo settings={settings} locale={locale} size="lg" />
         </Link>
 
         <NavLinks items={navItems} />
 
         <div className="flex shrink-0 items-center gap-2">
+          <form
+            action="/products"
+            role="search"
+            className="hidden sm:block"
+          >
+            <div className="flex items-center gap-1.5 rounded-md border border-black/10 bg-white p-1 ps-2.5 transition-shadow focus-within:ring-2 focus-within:ring-gold-500">
+              <Search
+                className="h-4 w-4 shrink-0 text-muted-foreground"
+                aria-hidden
+              />
+              <label htmlFor="header-search" className="sr-only">
+                {t(locale, "searchPlaceholder")}
+              </label>
+              <input
+                id="header-search"
+                name="q"
+                type="search"
+                placeholder={t(locale, "searchPlaceholder")}
+                className="h-7 w-44 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none md:w-56 lg:w-72"
+              />
+            </div>
+          </form>
           <Link
             href="/products"
             aria-label={t(locale, "searchButton")}
             title={t(locale, "searchButton")}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white text-foreground transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-black/10 bg-white text-foreground transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 sm:hidden"
           >
             <Search className="h-4 w-4" aria-hidden />
           </Link>

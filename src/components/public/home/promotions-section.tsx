@@ -16,21 +16,29 @@ export function PromotionsSection({
   promotions: PromotionCard[];
   locale: Locale;
 }) {
-  if (promotions.length === 0) {
-    return null;
-  }
-
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8"
+      id="promotions"
+      className="mx-auto w-full max-w-7xl scroll-mt-36 px-4 py-14 sm:px-6 lg:px-8"
       aria-labelledby="promotions-title"
     >
       <SectionHeader
         id="promotions-title"
         title={t(locale, "sectionPromotions")}
-        action={{ label: t(locale, "viewAllPromotions"), href: "/promotions" }}
+        action={
+          promotions.length > 0
+            ? { label: t(locale, "viewAllPromotions"), href: "/promotions" }
+            : undefined
+        }
       />
 
+      {promotions.length === 0 ? (
+        <div className="mt-7 rounded-lg border border-dashed border-black/15 bg-muted/50 px-6 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t(locale, "promotionsEmpty")}
+          </p>
+        </div>
+      ) : (
       <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {promotions.map((promotion) => {
           const title = pickLocalized(
@@ -87,6 +95,7 @@ export function PromotionsSection({
           );
         })}
       </div>
+      )}
     </section>
   );
 }

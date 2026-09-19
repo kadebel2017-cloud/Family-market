@@ -53,12 +53,12 @@ export function MobileNav({
             type="button"
             aria-label={t(locale, "navCloseMenu")}
             onClick={() => setOpen(false)}
-            className="absolute inset-x-0 top-16 z-30 h-[calc(100dvh-4rem)] bg-black/20 lg:hidden"
+            className="absolute inset-x-0 top-full z-30 h-[calc(100dvh-100%)] bg-black/20 lg:hidden"
           />
           <nav
             id="mobile-nav"
             aria-label={t(locale, "navMenu")}
-            className="absolute inset-x-0 top-16 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-black/10 bg-surface px-4 pb-4 pt-2 shadow-lg lg:hidden"
+            className="absolute inset-x-0 top-full z-40 max-h-[calc(100dvh-100%)] overflow-y-auto border-t border-black/10 bg-surface px-4 pb-4 pt-2 shadow-lg lg:hidden"
           >
             <NavLinks
               items={items}

@@ -50,7 +50,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${notoSans.variable} ${notoSansArabic.variable} h-full antialiased`}
+      className={`${notoSans.variable} ${notoSansArabic.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         {children}

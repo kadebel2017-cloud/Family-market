@@ -16,27 +16,34 @@ export function StoreLogo({
   settings,
   locale,
   dark = false,
+  size = "md",
 }: {
   settings: PublicSettings | null;
   locale: Locale;
   dark?: boolean;
+  size?: "md" | "lg";
 }) {
   const name = storeName(settings, locale);
+  const large = size === "lg";
 
   if (settings?.logoImage) {
     return (
-      <span className="flex min-w-0 items-center gap-2.5">
+      <span className={cn("flex min-w-0 items-center", large ? "gap-3" : "gap-2.5")}>
         <Image
           src={settings.logoImage}
           alt=""
-          width={40}
-          height={40}
+          width={large ? 60 : 40}
+          height={large ? 60 : 40}
           unoptimized
-          className="h-10 w-10 shrink-0 rounded-lg object-contain"
+          className={cn(
+            "shrink-0 rounded-lg object-contain",
+            large ? "h-[60px] w-[60px]" : "h-10 w-10",
+          )}
         />
         <span
           className={cn(
-            "truncate text-base font-bold",
+            "truncate font-bold",
+            large ? "text-[1.35rem]" : "text-base",
             dark ? "text-white" : "text-foreground",
           )}
         >
@@ -47,11 +54,12 @@ export function StoreLogo({
   }
 
   return (
-    <span className="flex min-w-0 items-center gap-2.5">
+    <span className={cn("flex min-w-0 items-center", large ? "gap-3" : "gap-2.5")}>
       <span
         aria-hidden
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold shadow-sm ring-1 ring-black/5",
+          "flex shrink-0 items-center justify-center rounded-lg font-extrabold shadow-sm ring-1 ring-black/5",
+          large ? "h-[60px] w-[60px] text-xl" : "h-10 w-10 text-sm",
           dark ? "bg-gold-400 text-black" : "bg-gold-500 text-white",
         )}
       >
@@ -59,7 +67,8 @@ export function StoreLogo({
       </span>
       <span
         className={cn(
-          "truncate text-base font-bold",
+          "truncate font-bold",
+          large ? "text-2xl" : "text-base",
           dark ? "text-white" : "text-foreground",
         )}
       >
