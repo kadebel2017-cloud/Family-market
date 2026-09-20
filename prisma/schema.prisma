@@ -124,6 +124,7 @@ model Promotion {
   // until the admin explicitly enables it.
   showSavings   Boolean            @default(false)
   products      PromotionProduct[]
+  slides        PromotionSlide[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
@@ -195,22 +196,46 @@ model HeroSlide {
 }
 
 // ---------------------------------------------------------------
+// Promotion media slideshow
+// ---------------------------------------------------------------
+
+// Ordered usage of MediaAsset records for a single Promotion.
+// Mirrors HeroSlide architecture: file stays in MediaAsset,
+// PromotionSlide is usage/order. Unlimited rows, max 10 active
+// per promotion (enforced in app logic). Additive only.
+model PromotionSlide {
+  id          String     @id @default(cuid())
+  promotionId String
+  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  mediaId     String
+  media       MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([promotionId, mediaId])
+  @@index([promotionId, isActive, sortOrder])
+}
+
+// ---------------------------------------------------------------
 // Media
 // ---------------------------------------------------------------
 
 model MediaAsset {
-  id        String         @id @default(cuid())
-  name      String
-  url       String
-  type      MediaType
-  mimeType  String?
-  size      Int?
-  category  MediaCategory  @default(OTHER)
-  altFr     String?
-  altAr     String?
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  heroSlides HeroSlide[]
+  id              String           @id @default(cuid())
+  name            String
+  url             String
+  type            MediaType
+  mimeType        String?
+  size            Int?
+  category        MediaCategory    @default(OTHER)
+  altFr           String?
+  altAr           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  heroSlides      HeroSlide[]
+  promotionSlides PromotionSlide[]
 
   @@index([type])
   @@index([category])

@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PromotionForm, type PromotionFormInitial } from "@/components/admin/promotion-form";
+import { PromotionSlidesManager } from "@/components/admin/promotions/promotion-slides-manager";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { requireAdmin } from "@/lib/auth/dal";
 import { db } from "@/lib/db";
 import { safeQuery } from "@/lib/admin/queries";
 import { toDatetimeLocal } from "@/lib/admin/format";
 import { updatePromotion } from "@/lib/actions/promotions";
+import { listPromotionSlides } from "@/lib/actions/promotion-slides";
 
 export const metadata: Metadata = {
   title: "Modifier la promotion",
@@ -74,12 +76,15 @@ export default async function AdminPromotionEditPage({
     })),
   };
 
+  const promotionSlides = await safeQuery(() => listPromotionSlides(promotion.id), []);
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
       <AdminPageHeader
         title="Modifier la promotion"
         description={promotion.titleFr}
       />
+      <PromotionSlidesManager promotionId={promotion.id} initialSlides={promotionSlides} />
       <PromotionForm
         action={updatePromotion}
         products={products.map((product) => ({

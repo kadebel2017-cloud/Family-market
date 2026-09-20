@@ -148,12 +148,24 @@ export interface PromotionPackLine {
   lineTotal: string;
 }
 
+export interface PromotionSlidePublic {
+  id: string;
+  mediaId: string;
+  name: string;
+  url: string;
+  type: "image" | "video";
+  altFr: string | null;
+  altAr: string | null;
+  sortOrder: number;
+}
+
 export interface PromotionDetail extends PromotionCard {
   status: PromotionStatus;
   products: ProductCard[];
   packLines: PromotionPackLine[];
   normalTotal: string | null;
   packSavings: string | null;
+  slides: PromotionSlidePublic[];
 }
 
 const PUBLIC_PAGE_SIZE = 12;
@@ -633,14 +645,22 @@ export async function getPromotionById(
     return null;
   }
   return safePublic(async () => {
-    const promotion = await db.promotion.findUnique({
-      where: { id: cleanId },
-      include: {
-        products: {
-          include: { product: { include: { category: true } } },
+    const [promotion, activeSlides] = await Promise.all([
+      db.promotion.findUnique({
+        where: { id: cleanId },
+        include: {
+          products: {
+            include: { product: { include: { category: true } } },
+          },
         },
-      },
-    });
+      }),
+      db.promotionSlide.findMany({
+        where: { promotionId: cleanId, isActive: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        take: 10,
+        include: { media: true },
+      }),
+    ]);
     if (!promotion) {
       return null;
     }
@@ -690,7 +710,17 @@ export async function getPromotionById(
       normalTotal = formatDecimal(totals.normalTotal);
       packSavings = formatDecimal(totals.savings);
     }
-    return { ...toPromotionCard(promotion), status, products, packLines, normalTotal, packSavings };
+    const slides: PromotionSlidePublic[] = activeSlides.map((slide) => ({
+      id: slide.id,
+      mediaId: slide.mediaId,
+      name: slide.media.name,
+      url: slide.media.url,
+      type: slide.media.type,
+      altFr: slide.media.altFr,
+      altAr: slide.media.altAr,
+      sortOrder: slide.sortOrder,
+    }));
+    return { ...toPromotionCard(promotion), status, products, packLines, normalTotal, packSavings, slides };
   }, null);
 }
 

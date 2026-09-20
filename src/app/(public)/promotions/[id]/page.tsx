@@ -10,6 +10,7 @@ import { formatPrice, formatPublicDate } from "@/lib/public/format";
 import { getPromotionById } from "@/lib/public/queries";
 import { ProductGridCard } from "@/components/public/catalog/product-card";
 import { ImageFallback } from "@/components/public/image-fallback";
+import { PromotionMediaSlider } from "@/components/public/promotions/promotion-media-slider";
 
 type PromotionParams = { params: Promise<{ id: string }> };
 
@@ -37,6 +38,7 @@ export async function generateMetadata({
   const description =
     pickLocalized(locale, promotion.descriptionFr, promotion.descriptionAr) ||
     `${title} — ${t(locale, "titlePromotions")}`;
+  const ogImage = promotion.slides[0]?.url ?? promotion.image ?? null;
   return {
     title,
     description,
@@ -47,9 +49,7 @@ export async function generateMetadata({
       description,
       locale: locale === "ar" ? "ar_DZ" : "fr_FR",
       type: "website",
-      images: promotion.image
-        ? [{ url: promotion.image, alt: title }]
-        : undefined,
+      images: ogImage ? [{ url: ogImage, alt: title }] : undefined,
     },
   };
 }
@@ -85,21 +85,18 @@ export default async function PromotionDetailPage({
       </Link>
 
       <article className="mt-4 overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm">
-        <div className="overflow-hidden bg-black/5">
-          {promotion.image ? (
-            // Full original image, same as the homepage promotion cards:
-            // natural ratio, full width, auto height — never cropped.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={promotion.image}
-              alt={title}
-              draggable={false}
-              className="block h-auto w-full"
-            />
-          ) : (
+        {promotion.slides.length > 0 ? (
+          <PromotionMediaSlider slides={promotion.slides} locale={locale} title={title} />
+        ) : promotion.image ? (
+          <div className="overflow-hidden bg-black/5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={promotion.image} alt={title} draggable={false} className="block h-auto w-full" />
+          </div>
+        ) : (
+          <div className="overflow-hidden bg-black/5">
             <ImageFallback kind="promotion" iconClassName="h-14 w-14" />
-          )}
-        </div>
+          </div>
+        )}
         <div className="flex flex-col gap-3 p-5 sm:p-7">
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant={status.variant}>{t(locale, status.key)}</Badge>
