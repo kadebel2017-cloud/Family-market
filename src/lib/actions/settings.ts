@@ -50,6 +50,9 @@ export async function updateSettings(
     openingTime: openingTime.value,
     closingTime: closingTime.value,
     isOpenAutomatically: checkboxBool(formData, "isOpenAutomatically"),
+    findStoreEnabled: checkboxBool(formData, "findStoreEnabled"),
+    findStoreTitle: optionalText(formData, "findStoreTitle"),
+    findStoreVideoUrl: optionalText(formData, "findStoreVideoUrl"),
   };
 
   try {

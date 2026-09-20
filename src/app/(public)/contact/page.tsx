@@ -6,6 +6,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  Play,
 } from "lucide-react";
 
 import { getLocale } from "@/lib/i18n/locale";
@@ -102,6 +103,12 @@ export default async function ContactPage() {
     settings?.addressAr,
   );
   const mapsUrl = safeExternalUrl(settings?.googleMapsUrl);
+  const findStoreVideoUrl =
+    settings?.findStoreEnabled && settings?.findStoreVideoUrl
+      ? safeExternalUrl(settings.findStoreVideoUrl)
+      : null;
+  const findStoreTitleText =
+    settings?.findStoreTitle?.trim() || "Comment arriver au magasin ?";
   const socials = SOCIAL_ITEMS.map((item) => ({
     ...item,
     url: safeExternalUrl(settings?.[item.key]),
@@ -223,6 +230,28 @@ export default async function ContactPage() {
                 {t(locale, "contactMapsLabel")}
               </a>
             </div>
+          ) : null}
+
+          {findStoreVideoUrl ? (
+            <a
+              href={findStoreVideoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-3 rounded-lg border border-black/10 bg-surface p-4 transition-colors hover:border-gold-500 hover:bg-gold-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 sm:col-span-2 lg:col-span-3"
+            >
+              <span className="flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700">
+                  <MapPin className="h-5 w-5" aria-hidden />
+                </span>
+                <span className="text-sm font-semibold text-foreground">
+                  📍 {findStoreTitleText}
+                </span>
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-gold-700">
+                <Play className="h-4 w-4" aria-hidden />
+                Voir l&apos;itinéraire vidéo
+              </span>
+            </a>
           ) : null}
 
           {socials.length > 0 ? (

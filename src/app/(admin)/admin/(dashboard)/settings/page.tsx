@@ -39,6 +39,9 @@ export default async function AdminSettingsPage() {
         openingTime: settings.openingTime,
         closingTime: settings.closingTime,
         isOpenAutomatically: settings.isOpenAutomatically,
+        findStoreEnabled: settings.findStoreEnabled,
+        findStoreTitle: settings.findStoreTitle,
+        findStoreVideoUrl: settings.findStoreVideoUrl,
       }
     : undefined;
 

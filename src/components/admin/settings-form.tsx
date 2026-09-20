@@ -32,6 +32,9 @@ export interface SettingsFormInitial {
   openingTime: string;
   closingTime: string;
   isOpenAutomatically: boolean;
+  findStoreEnabled: boolean;
+  findStoreTitle: string | null;
+  findStoreVideoUrl: string | null;
 }
 
 export interface SettingsFormProps {
@@ -189,6 +192,36 @@ export function SettingsForm({ action, initial }: SettingsFormProps) {
             />
             Calculer l&apos;état ouvert/fermé selon les horaires
           </label>
+        </Field>
+      </Fieldset>
+
+      <Fieldset legend="📍 Trouver le magasin" description="Lien vidéo pour aider les clients à trouver le magasin.">
+        <Field label='Activer "Trouver le magasin"'>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox name="findStoreEnabled" defaultChecked={initial?.findStoreEnabled ?? false} />
+            Activer &quot;Trouver le magasin&quot;
+          </label>
+        </Field>
+        <Field label="Titre" htmlFor="findStoreTitle" hint='Exemple : Comment arriver au magasin ?'>
+          <Input
+            id="findStoreTitle"
+            name="findStoreTitle"
+            defaultValue={initial?.findStoreTitle ?? ""}
+            placeholder="Comment arriver au magasin ?"
+          />
+        </Field>
+        <Field
+          label="Lien vidéo"
+          htmlFor="findStoreVideoUrl"
+          hint="Facebook vidéo / Reel, YouTube ou tout lien vidéo public."
+        >
+          <Input
+            id="findStoreVideoUrl"
+            name="findStoreVideoUrl"
+            type="url"
+            defaultValue={initial?.findStoreVideoUrl ?? ""}
+            placeholder="https://facebook.com/..."
+          />
         </Field>
       </Fieldset>
 

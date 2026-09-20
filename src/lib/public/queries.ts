@@ -22,6 +22,9 @@ export interface PublicSettings {
   openingTime: string;
   closingTime: string;
   isOpenAutomatically: boolean;
+  findStoreEnabled: boolean;
+  findStoreTitle: string | null;
+  findStoreVideoUrl: string | null;
 }
 
 export interface CategoryCard {
@@ -279,6 +282,9 @@ export async function getSettings(): Promise<PublicSettings | null> {
       openingTime: settings.openingTime,
       closingTime: settings.closingTime,
       isOpenAutomatically: settings.isOpenAutomatically,
+      findStoreEnabled: settings.findStoreEnabled,
+      findStoreTitle: settings.findStoreTitle,
+      findStoreVideoUrl: settings.findStoreVideoUrl,
     } satisfies PublicSettings;
   }, null);
 }

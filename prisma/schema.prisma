@@ -171,6 +171,9 @@ model StoreSettings {
   openingTime         String
   closingTime         String
   isOpenAutomatically Boolean  @default(true)
+  findStoreEnabled    Boolean  @default(false)
+  findStoreTitle      String?
+  findStoreVideoUrl   String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
