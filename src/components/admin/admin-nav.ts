@@ -1,6 +1,7 @@
 import {
   FolderTree,
   Image as ImageIcon,
+  KeyRound,
   LayoutDashboard,
   Settings,
   ShoppingBasket,
@@ -21,4 +22,5 @@ export const ADMIN_NAV = [
   { label: "Promotions", href: "/admin/promotions", icon: Tag },
   { label: "Médias", href: "/admin/media", icon: ImageIcon },
   { label: "Paramètres", href: "/admin/settings", icon: Settings },
+  { label: "Compte", href: "/admin/account", icon: KeyRound },
 ] satisfies AdminNavItem[];

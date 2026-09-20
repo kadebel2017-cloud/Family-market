@@ -54,7 +54,15 @@ export default async function AdminDashboardPage() {
             Connecté en tant que {admin.name} ({admin.email})
           </Text>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/account"
+            className="rounded-md border border-black/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-black/5"
+          >
+            Compte
+          </Link>
+          <LogoutButton />
+        </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
