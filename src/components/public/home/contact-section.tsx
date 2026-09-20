@@ -4,6 +4,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  Play,
 } from "lucide-react";
 
 import { t, pickLocalized } from "@/lib/i18n/translations";
@@ -37,12 +38,18 @@ export function ContactSection({
     settings?.addressAr,
   );
   const mapsUrl = safeExternalUrl(settings?.googleMapsUrl);
+  const findStoreVideoUrl =
+    settings?.findStoreEnabled && settings?.findStoreVideoUrl
+      ? safeExternalUrl(settings.findStoreVideoUrl)
+      : null;
   const socials = SOCIAL_LABELS.map((item) => ({
     ...item,
     url: safeExternalUrl(settings?.[item.key]),
   })).filter((item) => item.url !== null);
 
-  const hasContent = Boolean(phone || whatsapp || address || mapsUrl || socials.length > 0);
+  const hasContent = Boolean(
+    phone || whatsapp || address || mapsUrl || findStoreVideoUrl || socials.length > 0,
+  );
   if (!hasContent) {
     return null;
   }
@@ -114,17 +121,30 @@ export function ContactSection({
           </div>
         ) : null}
 
-        {mapsUrl ? (
-          <div className="flex items-start gap-3 rounded-lg border border-black/10 bg-surface p-4 sm:col-span-2 lg:col-span-3">
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-md bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:ring-offset-2"
-            >
-              <ExternalLink className="h-4 w-4" aria-hidden />
-              {t(locale, "contactMapsLabel")}
-            </a>
+        {mapsUrl || findStoreVideoUrl ? (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-black/10 bg-surface p-4 sm:col-span-2 lg:col-span-3">
+            {mapsUrl ? (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md bg-black px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:ring-offset-2"
+              >
+                <ExternalLink className="h-4 w-4" aria-hidden />
+                {t(locale, "contactMapsLabel")}
+              </a>
+            ) : null}
+            {findStoreVideoUrl ? (
+              <a
+                href={findStoreVideoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md bg-gold-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gold-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 focus-visible:ring-offset-2"
+              >
+                <Play className="h-4 w-4" aria-hidden />
+                Voir l&apos;itinéraire vidéo
+              </a>
+            ) : null}
           </div>
         ) : null}
 
