@@ -109,7 +109,7 @@ export default async function ProductDetailPage({ params }: ProductParams) {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              className="object-contain object-center"
             />
           ) : (
             <ImageFallback kind="product" iconClassName="h-14 w-14" />
