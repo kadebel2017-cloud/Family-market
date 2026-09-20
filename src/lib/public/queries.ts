@@ -45,6 +45,7 @@ export interface PromotionCard {
   endDate: string;
   type: "PRODUCT_DISCOUNT" | "PACK";
   packPrice: string | null;
+  showSavings: boolean;
 }
 
 export interface ProductCard {
@@ -138,6 +139,7 @@ export type PromotionStatus = "active" | "scheduled" | "expired";
 
 export interface PromotionPackLine {
   productId: string;
+  slug: string;
   nameFr: string;
   nameAr: string;
   image: string | null;
@@ -214,6 +216,7 @@ function toPromotionCard(promotion: {
   endDate: Date;
   type: string;
   packPrice: DecimalLike | null;
+  showSavings: boolean;
 }): PromotionCard {
   return {
     id: promotion.id,
@@ -226,6 +229,7 @@ function toPromotionCard(promotion: {
     endDate: promotion.endDate.toISOString(),
     type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
     packPrice: promotion.packPrice?.toFixed(2) ?? null,
+    showSavings: promotion.showSavings,
   };
 }
 
@@ -425,6 +429,7 @@ export async function getHomeData(): Promise<PublicHomeData> {
       endDate: promotion.endDate.toISOString(),
       type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
       packPrice: promotion.packPrice?.toFixed(2) ?? null,
+      showSavings: promotion.showSavings,
     })),
     products: products.map((product) => ({
       id: product.id,
@@ -663,6 +668,7 @@ export async function getPromotionById(
           .filter((link) => link.product.isAvailable)
           .map((link) => ({
             productId: link.productId,
+            slug: link.product.slug,
             nameFr: link.product.nameFr,
             nameAr: link.product.nameAr,
             image: link.product.image,

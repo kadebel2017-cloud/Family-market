@@ -35,6 +35,7 @@ export default async function AdminPromotionEditPage({
       isActive: true,
       type: true,
       packPrice: true,
+      showSavings: true,
       products: { select: { productId: true, quantity: true, promoPrice: true } },
     },
   });
@@ -47,7 +48,7 @@ export default async function AdminPromotionEditPage({
     () =>
       db.product.findMany({
         orderBy: { nameFr: "asc" },
-        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true },
+        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true, image: true },
       }),
     [],
   );
@@ -64,6 +65,7 @@ export default async function AdminPromotionEditPage({
     isActive: promotion.isActive,
     type: promotion.type === "PACK" ? "PACK" : "PRODUCT_DISCOUNT",
     packPrice: promotion.packPrice?.toFixed(2) ?? null,
+    showSavings: promotion.showSavings,
     productIds: promotion.products.map((product) => product.productId),
     items: promotion.products.map((product) => ({
       productId: product.productId,

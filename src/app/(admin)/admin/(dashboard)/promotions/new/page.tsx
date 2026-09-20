@@ -18,7 +18,7 @@ export default async function AdminPromotionNewPage() {
     () =>
       db.product.findMany({
         orderBy: { nameFr: "asc" },
-        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true },
+        select: { id: true, nameFr: true, nameAr: true, size: true, sku: true, price: true, image: true },
       }),
     [],
   );

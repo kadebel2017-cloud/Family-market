@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Package, Percent, ScanLine, X } from "lucide-react";
+import { Package, Percent, ScanLine, Search, X } from "lucide-react";
 
 import { Button, Input } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -34,13 +34,19 @@ export interface PromotionFormInitial {
   isActive: boolean;
   type: PromotionType;
   packPrice: string | null;
+  showSavings: boolean;
   productIds: string[];
   items: PromotionPackItem[];
 }
 
+type PromotionProductOption = SearchableProduct & {
+  price: string;
+  image: string | null;
+};
+
 export interface PromotionFormProps {
   action: MutationAction;
-  products: (SearchableProduct & { price: string })[];
+  products: PromotionProductOption[];
   initial?: PromotionFormInitial;
 }
 
@@ -62,7 +68,7 @@ function ProductPicker({
   checked,
   onSelect,
 }: {
-  products: (SearchableProduct & { price: string })[];
+  products: PromotionProductOption[];
   checked: Set<string>;
   onSelect: (id: string) => void;
 }) {
@@ -83,32 +89,42 @@ function ProductPicker({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Input
-          ref={inputRef}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => {
-            // Never submit the promotion form from the search field.
-            if (e.key === "Enter") {
-              e.preventDefault();
-              confirmSearch();
-            }
-          }}
-          placeholder="Rechercher par nom, taille ou code-barres…"
-          aria-label="Rechercher un produit"
-          className="flex-1"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => inputRef.current?.focus()}
-        >
-          <ScanLine className="h-4 w-4" aria-hidden />
-          Scanner
-        </Button>
+    <div className="flex flex-col gap-3">
+      <div className="rounded-lg border-2 border-gold-500 bg-gold-50/60 p-3 shadow-sm">
+        <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-gold-700">
+          <Search className="h-5 w-5 shrink-0" aria-hidden />
+          Rechercher ou scanner les produits
+        </p>
+        <div className="flex items-center gap-2">
+          <div className="relative flex flex-1 items-center">
+            <Search className="pointer-events-none absolute left-2.5 h-5 w-5 text-gold-700" aria-hidden />
+            <Input
+              ref={inputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                // Never submit the promotion form from the search field.
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  confirmSearch();
+                }
+              }}
+              placeholder="Rechercher par nom, taille ou code-barres…"
+              aria-label="Rechercher un produit"
+              className="flex-1 border-gold-300 bg-white pl-9 focus-visible:border-gold-500 focus-visible:ring-gold-500"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0 border-gold-500 bg-white text-gold-700 hover:bg-gold-50 hover:text-gold-800"
+            onClick={() => inputRef.current?.focus()}
+          >
+            <ScanLine className="h-5 w-5" aria-hidden />
+            Scanner
+          </Button>
+        </div>
       </div>
 
       {search.trim() === "" ? (
@@ -131,14 +147,29 @@ function ProductPicker({
                   onSelect(product.id);
                   setSearch("");
                 }}
-                className="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gold-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm hover:bg-gold-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
               >
-                <span className="min-w-0">
+                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-black/10 bg-black/5">
+                  {product.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={product.image}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center bg-gold-50 text-gold-600">
+                      <Package className="h-5 w-5" aria-hidden />
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">
                     {product.nameFr}
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {product.size}
+                    {product.size} • {toMoney(product.price).toFixed(2)} DA
                     {product.sku?.trim() ? ` · ${product.sku.trim()}` : ""}
                   </span>
                 </span>
@@ -178,7 +209,7 @@ export function PromotionForm({ action, products, initial }: PromotionFormProps)
   const [packPrice, setPackPrice] = useState(initial?.packPrice ?? "");
 
   const productById = useMemo(() => {
-    const map = new Map<string, (SearchableProduct & { price: string })>();
+    const map = new Map<string, PromotionProductOption>();
     for (const product of products) {
       map.set(product.id, product);
     }
@@ -523,6 +554,16 @@ export function PromotionForm({ action, products, initial }: PromotionFormProps)
           hint="Sélectionnez une image depuis la médiathèque."
         />
       </Fieldset>
+
+      <Field label="Affichage de l'économie">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox name="showSavings" defaultChecked={initial?.showSavings ?? false} />
+          Afficher l&apos;économie au client
+        </label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Quand décoché, la ligne Économie est masquée sur la page de la promotion.
+        </p>
+      </Field>
 
       <Field label="Promotion active">
         <label className="flex items-center gap-2 text-sm">

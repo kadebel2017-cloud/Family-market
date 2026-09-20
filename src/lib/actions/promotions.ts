@@ -170,6 +170,7 @@ export async function createPromotion(
         isActive: checkboxBool(formData, "isActive"),
         type,
         packPrice: resolved.value.packPrice,
+        showSavings: checkboxBool(formData, "showSavings"),
         products: {
           create: resolved.value.lines.map((line) => ({
             productId: line.productId,
@@ -223,6 +224,7 @@ export async function updatePromotion(
         isActive: checkboxBool(formData, "isActive"),
         type,
         packPrice: resolved.value.packPrice,
+        showSavings: checkboxBool(formData, "showSavings"),
         products: {
           deleteMany: {},
           create: resolved.value.lines.map((line) => ({

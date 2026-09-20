@@ -135,52 +135,72 @@ export default async function PromotionDetailPage({
           >
             {t(locale, "packContentsLabel")}
           </h2>
-          <div className="mt-5 overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm">
-            <ul className="divide-y divide-black/10">
-              {promotion.packLines.map((line) => {
-                const lineName = pickLocalized(locale, line.nameFr, line.nameAr);
-                return (
-                  <li
-                    key={line.productId}
-                    className="flex items-center justify-between gap-3 px-5 py-3"
-                  >
-                    <span className="text-sm font-medium text-foreground">
-                      {lineName} × {line.quantity}
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {promotion.packLines.map((line) => {
+              const lineName = pickLocalized(locale, line.nameFr, line.nameAr);
+              return (
+                <Link
+                  key={line.productId}
+                  href={`/products/${line.slug}`}
+                  className="group flex flex-col overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm transition-[border-color,box-shadow] hover:border-gold-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                >
+                  <span className="relative block aspect-[4/3] overflow-hidden bg-black/5">
+                    {line.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={line.image}
+                        alt={lineName}
+                        draggable={false}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <ImageFallback kind="product" />
+                    )}
+                    <span className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-0.5 text-xs font-bold text-white">
+                      ×{line.quantity}
                     </span>
-                    <span className="shrink-0 text-sm text-muted-foreground">
-                      {formatPrice(locale, line.lineTotal)}
+                  </span>
+                  <span className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
+                    <span className="line-clamp-2 text-sm font-semibold text-foreground group-hover:text-gold-700">
+                      {lineName}
                     </span>
-                  </li>
-                );
-              })}
-            </ul>
-            {promotion.normalTotal !== null && promotion.packPrice !== null ? (
-              <dl className="flex flex-col gap-1.5 border-t-2 border-gold-500 bg-gold-50/60 px-5 py-4">
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <dt className="text-muted-foreground">{t(locale, "normalTotalLabel")}</dt>
-                  <dd className="font-medium text-foreground line-through">
-                    {formatPrice(locale, promotion.normalTotal)}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <dt className="text-sm font-semibold text-foreground">
-                    {t(locale, "packPriceLabel")}
-                  </dt>
-                  <dd className="text-xl font-bold text-gold-600">
-                    {formatPrice(locale, promotion.packPrice)}
-                  </dd>
-                </div>
-                {promotion.packSavings !== null ? (
-                  <div className="flex items-center justify-between gap-3 text-sm">
-                    <dt className="font-medium text-emerald-700">{t(locale, "savingsLabel")}</dt>
-                    <dd className="font-bold text-emerald-700">
-                      {formatPrice(locale, promotion.packSavings)}
-                    </dd>
-                  </div>
-                ) : null}
-              </dl>
-            ) : null}
+                    <span className="text-sm font-bold text-foreground">
+                      {formatPrice(locale, line.unitPrice)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Quantité ×{line.quantity}
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
           </div>
+          {promotion.normalTotal !== null && promotion.packPrice !== null ? (
+            <dl className="mt-6 flex flex-col gap-1.5 rounded-lg border border-black/10 bg-gold-50/60 px-5 py-4">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <dt className="text-muted-foreground">{t(locale, "normalTotalLabel")}</dt>
+                <dd className="font-medium text-foreground line-through">
+                  {formatPrice(locale, promotion.normalTotal)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-sm font-semibold text-foreground">
+                  {t(locale, "packPriceLabel")}
+                </dt>
+                <dd className="text-xl font-bold text-gold-600">
+                  {formatPrice(locale, promotion.packPrice)}
+                </dd>
+              </div>
+              {promotion.showSavings && promotion.packSavings !== null ? (
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <dt className="font-medium text-emerald-700">{t(locale, "savingsLabel")}</dt>
+                  <dd className="font-bold text-emerald-700">
+                    {formatPrice(locale, promotion.packSavings)}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
         </section>
       ) : null}
 

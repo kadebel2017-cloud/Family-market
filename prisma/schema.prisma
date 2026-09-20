@@ -119,6 +119,10 @@ model Promotion {
   // Total promotional price for PACK offers. Null for PRODUCT_DISCOUNT.
   // Product.price is never modified — the pack price lives here.
   packPrice     Decimal?           @db.Decimal(10, 2)
+  // Whether to display the "Économie" savings row on the public PACK page.
+  // Defaults to false so existing promotions keep today's hidden behavior
+  // until the admin explicitly enables it.
+  showSavings   Boolean            @default(false)
   products      PromotionProduct[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
