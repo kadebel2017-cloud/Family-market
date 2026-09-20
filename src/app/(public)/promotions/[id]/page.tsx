@@ -127,47 +127,47 @@ export default async function PromotionDetailPage({
       {isPack ? (
         <section
           aria-labelledby="pack-contents-title"
-          className="mt-10"
+          className="mt-8"
         >
           <h2
             id="pack-contents-title"
-            className="text-xl font-bold text-foreground"
+            className="text-base font-bold text-foreground sm:text-lg"
           >
             {t(locale, "packContentsLabel")}
           </h2>
-          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 xl:grid-cols-5">
             {promotion.packLines.map((line) => {
               const lineName = pickLocalized(locale, line.nameFr, line.nameAr);
               return (
                 <Link
                   key={line.productId}
                   href={`/products/${line.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-lg border border-black/10 bg-surface shadow-sm transition-[border-color,box-shadow] hover:border-gold-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+                  className="group flex flex-col overflow-hidden rounded-md border border-black/10 bg-surface shadow-sm transition-[border-color,box-shadow] hover:border-gold-500 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
                 >
-                  <span className="relative block aspect-[4/3] overflow-hidden bg-black/5">
+                  <span className="relative flex h-[92px] items-center justify-center overflow-hidden bg-white p-2 sm:h-[108px]">
                     {line.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={line.image}
                         alt={lineName}
                         draggable={false}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-contain object-center"
                       />
                     ) : (
                       <ImageFallback kind="product" />
                     )}
-                    <span className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-0.5 text-xs font-bold text-white">
+                    <span className="absolute right-1.5 top-1.5 rounded-full bg-black/75 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                       ×{line.quantity}
                     </span>
                   </span>
-                  <span className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
-                    <span className="line-clamp-2 text-sm font-semibold text-foreground group-hover:text-gold-700">
+                  <span className="flex flex-1 flex-col gap-0.5 px-2 pb-2 pt-1.5 sm:px-2.5">
+                    <span className="line-clamp-2 text-xs font-semibold leading-tight text-foreground group-hover:text-gold-700">
                       {lineName}
                     </span>
-                    <span className="text-sm font-bold text-foreground">
+                    <span className="text-xs font-bold leading-none text-foreground">
                       {formatPrice(locale, line.unitPrice)}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[11px] leading-none text-muted-foreground">
                       Quantité ×{line.quantity}
                     </span>
                   </span>
