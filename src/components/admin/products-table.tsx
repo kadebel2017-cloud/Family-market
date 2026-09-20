@@ -100,8 +100,8 @@ export function ProductsTable({
                       action={toggleProductAvailability}
                       id={product.id}
                       isActive={product.isAvailable}
-                      activeLabel="Rendre indisponible"
-                      inactiveLabel="Rendre disponible"
+                      activeLabel="🔴 Rupture de stock"
+                      inactiveLabel="🟢 En stock"
                     />
                   </TableCell>
                   <TableCell className="text-right">
