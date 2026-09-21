@@ -29,7 +29,6 @@ export interface SettingsFormInitial {
   tiktokUrl: string | null;
   googleMapsUrl: string | null;
   logoImage: string | null;
-  heroMedia: string | null;
   openingTime: string;
   closingTime: string;
   isOpenAutomatically: boolean;
@@ -287,15 +286,6 @@ export function SettingsForm({ action, initial }: SettingsFormProps) {
             defaultValue={initial?.logoImage}
             chooseLabel="Choisir un logo"
             hint="Catégorie « Logo » recommandée dans la bibliothèque."
-          />
-          <MediaField
-            name="heroMedia"
-            label="Image / vidéo Hero"
-            accept="all"
-            category="HERO"
-            defaultValue={initial?.heroMedia}
-            chooseLabel="Choisir un média"
-            hint="Catégorie « Hero » recommandée pour l'image de couverture."
           />
         </div>
       </Fieldset>

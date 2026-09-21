@@ -46,7 +46,6 @@ export async function updateSettings(
     tiktokUrl: optionalText(formData, "tiktokUrl"),
     googleMapsUrl: optionalText(formData, "googleMapsUrl"),
     logoImage: optionalText(formData, "logoImage"),
-    heroMedia: optionalText(formData, "heroMedia"),
     openingTime: openingTime.value,
     closingTime: closingTime.value,
     isOpenAutomatically: checkboxBool(formData, "isOpenAutomatically"),
