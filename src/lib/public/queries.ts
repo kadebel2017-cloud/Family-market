@@ -391,10 +391,12 @@ export async function getHomeData(): Promise<PublicHomeData> {
   const [categories, promotions, products] = await Promise.all([
     safePublic(
       () =>
+        // No `take` limit: every active category must appear (homepage
+        // grid + "Voir toutes les catégories"), whether there are 12,
+        // 13 or more. Ordered by sortOrder like the admin list.
         db.category.findMany({
           where: { isActive: true },
           orderBy: { sortOrder: "asc" },
-          take: 12,
         }),
       [],
     ),
@@ -513,6 +515,63 @@ export async function getCategoryBySlug(
     });
     return { ...toCategoryCard(category), productCount };
   }, null);
+}
+
+export interface AboutSlidePublic {
+  id: string;
+  name: string;
+  url: string;
+  altFr: string | null;
+  altAr: string | null;
+}
+
+export interface AboutPublicData {
+  titleFr: string | null;
+  titleAr: string | null;
+  descriptionFr: string | null;
+  descriptionAr: string | null;
+  slides: AboutSlidePublic[];
+}
+
+// Public "À propos" content, edited from Admin → Paramètres.
+// Returns whatever is set (possibly nothing) — the page decides what
+// to render and never invents business information.
+export async function getAboutData(): Promise<AboutPublicData> {
+  return safePublic(async () => {
+    const [settings, slides] = await Promise.all([
+      db.storeSettings.findUnique({
+        where: { id: "default" },
+        select: {
+          aboutTitleFr: true,
+          aboutTitleAr: true,
+          aboutDescriptionFr: true,
+          aboutDescriptionAr: true,
+        },
+      }),
+      db.vitrineSlide.findMany({
+        where: { isActive: true, media: { type: "image" } },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        include: { media: true },
+      }),
+    ]);
+    return {
+      titleFr: settings?.aboutTitleFr?.trim() ? settings.aboutTitleFr : null,
+      titleAr: settings?.aboutTitleAr?.trim() ? settings.aboutTitleAr : null,
+      descriptionFr: settings?.aboutDescriptionFr?.trim()
+        ? settings.aboutDescriptionFr
+        : null,
+      descriptionAr: settings?.aboutDescriptionAr?.trim()
+        ? settings.aboutDescriptionAr
+        : null,
+      slides: slides.map((slide) => ({
+        id: slide.id,
+        name: slide.media.name,
+        url: slide.media.url,
+        altFr: slide.media.altFr,
+        altAr: slide.media.altAr,
+      })),
+    };
+  }, { titleFr: null, titleAr: null, descriptionFr: null, descriptionAr: null, slides: [] });
 }
 
 export async function getProductsPage({

@@ -3,6 +3,7 @@ export const MEDIA_CATEGORIES = [
   "CATEGORY",
   "PROMOTION",
   "HERO",
+  "VITRINE",
   "STORE",
   "LOGO",
   "OTHER",

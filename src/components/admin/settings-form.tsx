@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import {
   Clock,
   Image as ImageIcon,
+  Info,
   MapPin,
   Phone,
   Share2,
@@ -12,7 +13,7 @@ import {
 
 import { Button, Input } from "@/components/ui";
 import type { FormState, MutationAction } from "@/lib/actions/types";
-import { Checkbox, Field, Fieldset } from "./fields";
+import { Checkbox, Field, Fieldset, TextArea } from "./fields";
 import { FormMessage } from "./form-message";
 import { MediaField } from "./media/media-field";
 
@@ -35,6 +36,10 @@ export interface SettingsFormInitial {
   findStoreEnabled: boolean;
   findStoreTitle: string | null;
   findStoreVideoUrl: string | null;
+  aboutTitleFr: string | null;
+  aboutTitleAr: string | null;
+  aboutDescriptionFr: string | null;
+  aboutDescriptionAr: string | null;
 }
 
 export interface SettingsFormProps {
@@ -226,6 +231,49 @@ export function SettingsForm({ action, initial }: SettingsFormProps) {
       </Fieldset>
 
       <Fieldset
+        legend="À propos"
+        description="Contenu affiché sur la page publique « À propos ». Laissez vide pour ne rien afficher."
+        icon={Info}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Titre (FR)" htmlFor="aboutTitleFr">
+            <Input
+              id="aboutTitleFr"
+              name="aboutTitleFr"
+              defaultValue={initial?.aboutTitleFr ?? ""}
+              placeholder="À propos de Family Market"
+            />
+          </Field>
+          <Field label="Titre (AR)" htmlFor="aboutTitleAr">
+            <Input
+              id="aboutTitleAr"
+              name="aboutTitleAr"
+              defaultValue={initial?.aboutTitleAr ?? ""}
+              placeholder="عن فاميلي ماركت"
+              dir="rtl"
+            />
+          </Field>
+        </div>
+        <Field label="Description (FR)" htmlFor="aboutDescriptionFr">
+          <TextArea
+            id="aboutDescriptionFr"
+            name="aboutDescriptionFr"
+            defaultValue={initial?.aboutDescriptionFr ?? ""}
+            placeholder="Présentez le magasin : histoire, valeurs, rayons…"
+          />
+        </Field>
+        <Field label="Description (AR)" htmlFor="aboutDescriptionAr">
+          <TextArea
+            id="aboutDescriptionAr"
+            name="aboutDescriptionAr"
+            defaultValue={initial?.aboutDescriptionAr ?? ""}
+            placeholder="عرّفوا بالمتجر…"
+            dir="rtl"
+          />
+        </Field>
+      </Fieldset>
+
+      <Fieldset
         legend="Identité visuelle"
         description="Médias déjà téléversés dans la bibliothèque."
         icon={ImageIcon}
@@ -242,12 +290,12 @@ export function SettingsForm({ action, initial }: SettingsFormProps) {
           />
           <MediaField
             name="heroMedia"
-            label="Image / vidéo de la vitrine"
+            label="Image / vidéo Hero"
             accept="all"
             category="HERO"
             defaultValue={initial?.heroMedia}
             chooseLabel="Choisir un média"
-            hint="Catégorie « Vitrine » recommandée pour l'image de couverture."
+            hint="Catégorie « Hero » recommandée pour l'image de couverture."
           />
         </div>
       </Fieldset>

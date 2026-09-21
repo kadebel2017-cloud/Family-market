@@ -53,6 +53,10 @@ export async function updateSettings(
     findStoreEnabled: checkboxBool(formData, "findStoreEnabled"),
     findStoreTitle: optionalText(formData, "findStoreTitle"),
     findStoreVideoUrl: optionalText(formData, "findStoreVideoUrl"),
+    aboutTitleFr: optionalText(formData, "aboutTitleFr"),
+    aboutTitleAr: optionalText(formData, "aboutTitleAr"),
+    aboutDescriptionFr: optionalText(formData, "aboutDescriptionFr"),
+    aboutDescriptionAr: optionalText(formData, "aboutDescriptionAr"),
   };
 
   try {
@@ -73,6 +77,7 @@ export async function updateSettings(
     }
 
     revalidatePath(ADMIN_SETTINGS_PATH);
+    revalidatePath("/about");
     revalidatePath("/", "layout");
     return { ok: true };
   } catch (error) {

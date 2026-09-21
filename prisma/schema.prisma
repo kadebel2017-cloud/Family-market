@@ -30,6 +30,7 @@ enum MediaCategory {
   CATEGORY
   PROMOTION
   HERO
+  VITRINE
   STORE
   LOGO
   OTHER
@@ -168,6 +169,12 @@ model StoreSettings {
   googleMapsUrl       String?
   logoImage           String?
   heroMedia           String?
+  // Public "À propos" page content, edited from Admin → Paramètres.
+  // All optional: the public page stays clean when nothing is set.
+  aboutTitleFr        String?
+  aboutTitleAr        String?
+  aboutDescriptionFr  String?
+  aboutDescriptionAr  String?
   openingTime         String
   closingTime         String
   isOpenAutomatically Boolean  @default(true)
@@ -222,6 +229,26 @@ model PromotionSlide {
 }
 
 // ---------------------------------------------------------------
+// Vitrine (About page gallery)
+// ---------------------------------------------------------------
+
+// Ordered usage of MediaAsset records for the public "À propos" page
+// gallery. Mirrors the HeroSlide architecture: the file stays in
+// MediaAsset — VitrineSlide is only the usage/order relationship.
+// Unlimited rows, max 10 active (enforced in app logic). Additive only.
+model VitrineSlide {
+  id        String     @id @default(cuid())
+  mediaId   String     @unique
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+// ---------------------------------------------------------------
 // Media
 // ---------------------------------------------------------------
 
@@ -239,6 +266,7 @@ model MediaAsset {
   updatedAt       DateTime         @updatedAt
   heroSlides      HeroSlide[]
   promotionSlides PromotionSlide[]
+  vitrineSlides   VitrineSlide[]
 
   @@index([type])
   @@index([category])

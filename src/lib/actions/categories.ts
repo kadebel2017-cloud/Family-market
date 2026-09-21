@@ -32,7 +32,12 @@ export async function createCategory(
   if (!nameFr.ok) return { error: nameFr.error };
   if (!nameAr.ok) return { error: nameAr.error };
 
-  const slug = text(formData, "slug") || slugify(nameFr.value);
+  // Always normalize through slugify so the public /categories/[slug]
+  // page (exact database slug lookup) keeps working no matter what the
+  // admin typed in the slug field — raw names with spaces, accents or
+  // "&" would otherwise produce unreachable category pages.
+  const slug = slugify(text(formData, "slug") || nameFr.value);
+  if (!slug) return { error: "L'identifiant (slug) est invalide." };
 
   try {
     await db.category.create({
@@ -73,7 +78,10 @@ export async function updateCategory(
   if (!nameFr.ok) return { error: nameFr.error };
   if (!nameAr.ok) return { error: nameAr.error };
 
-  const slug = text(formData, "slug") || slugify(nameFr.value);
+  // Same normalization as createCategory: the public category page
+  // looks the category up by its exact database slug.
+  const slug = slugify(text(formData, "slug") || nameFr.value);
+  if (!slug) return { error: "L'identifiant (slug) est invalide." };
 
   try {
     await db.category.update({

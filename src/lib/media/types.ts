@@ -5,6 +5,7 @@ export type MediaCategory =
   | "CATEGORY"
   | "PROMOTION"
   | "HERO"
+  | "VITRINE"
   | "STORE"
   | "LOGO"
   | "OTHER";
@@ -31,7 +32,8 @@ export const MEDIA_CATEGORY_LABELS: Record<MediaCategory, string> = {
   PRODUCT: "Produit",
   CATEGORY: "Catégorie",
   PROMOTION: "Promotion",
-  HERO: "Vitrine",
+  HERO: "Hero",
+  VITRINE: "Vitrine",
   STORE: "Boutique",
   LOGO: "Logo",
   OTHER: "Autre",
@@ -44,7 +46,8 @@ export const MEDIA_CATEGORY_OPTIONS: {
   { value: "PRODUCT", label: "Produit" },
   { value: "CATEGORY", label: "Catégorie" },
   { value: "PROMOTION", label: "Promotion" },
-  { value: "HERO", label: "Vitrine" },
+  { value: "HERO", label: "Hero" },
+  { value: "VITRINE", label: "Vitrine" },
   { value: "STORE", label: "Boutique" },
   { value: "LOGO", label: "Logo" },
   { value: "OTHER", label: "Autre" },
