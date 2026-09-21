@@ -47,13 +47,23 @@ export default async function AboutPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-foreground">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <header className="max-w-4xl">
+        <span
+          aria-hidden
+          className="block h-1 w-16 rounded-full bg-gold-500"
+        />
+        <h1
+          dir="auto"
+          className="mt-5 text-balance text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
+        >
           {title || t(locale, "pageAboutTitle")}
         </h1>
         {description ? (
-          <p className="max-w-3xl whitespace-pre-line text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p
+            dir="auto"
+            className="mt-6 max-w-3xl whitespace-pre-line text-base leading-8 text-muted-foreground sm:text-lg"
+          >
             {description}
           </p>
         ) : null}
