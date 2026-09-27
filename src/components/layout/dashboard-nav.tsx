@@ -75,7 +75,13 @@ export function DashboardNav() {
                         "bg-gold-500 text-white hover:bg-gold-600 hover:text-white",
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 shrink-0",
+                        !active && item.iconClassName,
+                      )}
+                      aria-hidden
+                    />
                     {item.label}
                   </Link>
                 </li>

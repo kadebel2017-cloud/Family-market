@@ -12,6 +12,7 @@ import { StoreLogo, storeName } from "./store-logo";
 import { NavLinks } from "./site-nav";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileNav } from "./mobile-nav";
+import { CartLink } from "@/components/cart/cart-link";
 
 export function SiteHeader({
   settings,
@@ -121,6 +122,8 @@ export function SiteHeader({
               <span>{settings?.phone}</span>
             </a>
           ) : null}
+
+          <CartLink locale={locale} />
 
           <LocaleSwitcher locale={locale} />
 

@@ -21,9 +21,11 @@ export async function countAll(): Promise<{
   activePromotions: number;
   unavailableProducts: number;
   media: number;
+  orders: number;
+  newOrders: number;
 }> {
   const now = new Date();
-  const [products, categories, promotions, activePromotions, unavailableProducts, media] =
+  const [products, categories, promotions, activePromotions, unavailableProducts, media, orders, newOrders] =
     await Promise.all([
       safeQuery(() => db.product.count(), 0),
       safeQuery(() => db.category.count(), 0),
@@ -44,6 +46,8 @@ export async function countAll(): Promise<{
         0,
       ),
       safeQuery(() => db.mediaAsset.count(), 0),
+      safeQuery(() => db.order.count(), 0),
+      safeQuery(() => db.order.count({ where: { status: "NEW" } }), 0),
     ]);
   return {
     products,
@@ -52,6 +56,8 @@ export async function countAll(): Promise<{
     activePromotions,
     unavailableProducts,
     media,
+    orders,
+    newOrders,
   };
 }
 

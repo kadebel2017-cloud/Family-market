@@ -13,7 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "create-admin": "tsx src/scripts/create-admin.ts",
-    "seed:starter": "tsx src/scripts/seed-starter-catalog.ts"
+    "seed:starter": "tsx src/scripts/seed-starter-catalog.ts",
+    "seed:delivery": "tsx src/scripts/seed-delivery.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.1",

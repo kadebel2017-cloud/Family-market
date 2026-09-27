@@ -9,6 +9,7 @@ import { t, pickLocalized } from "@/lib/i18n/translations";
 import { formatPrice, formatPublicDate } from "@/lib/public/format";
 import { getPromotionById } from "@/lib/public/queries";
 import { ProductGridCard } from "@/components/public/catalog/product-card";
+import { AddPackToCart } from "@/components/cart/add-pack-to-cart";
 import { ImageFallback } from "@/components/public/image-fallback";
 import { PromotionMediaSlider } from "@/components/public/promotions/promotion-media-slider";
 
@@ -197,6 +198,33 @@ export default async function PromotionDetailPage({
                 </div>
               ) : null}
             </dl>
+          ) : null}
+          {promotion.status === "active" && promotion.packPrice !== null ? (
+            <div className="mt-4">
+              <AddPackToCart
+                locale={locale}
+                pack={{
+                  packId: promotion.id,
+                  titleFr: promotion.titleFr,
+                  titleAr: promotion.titleAr,
+                  image: promotion.image,
+                  packPrice: Number(promotion.packPrice),
+                  normalTotal:
+                    promotion.normalTotal === null
+                      ? Number(promotion.packPrice)
+                      : Number(promotion.normalTotal),
+                  items: promotion.packLines.map((line) => ({
+                    productId: line.productId,
+                    slug: line.slug,
+                    nameFr: line.nameFr,
+                    nameAr: line.nameAr,
+                    unitPrice: Number(line.unitPrice),
+                    image: line.image,
+                    qty: line.quantity,
+                  })),
+                }}
+              />
+            </div>
           ) : null}
         </section>
       ) : null}

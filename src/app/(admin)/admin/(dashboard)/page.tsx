@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   AlertTriangle,
+  ClipboardList,
   FolderTree,
   Image as ImageIcon,
   ShoppingBasket,
@@ -32,6 +33,8 @@ const STATS = [
   { key: "activePromotions", label: "Promotions actives", href: "/admin/promotions", icon: Tag },
   { key: "unavailableProducts", label: "Produits indisponibles", href: "/admin/products", icon: AlertTriangle },
   { key: "media", label: "Médias", href: "/admin/media", icon: ImageIcon },
+  { key: "orders", label: "Commandes", href: "/admin/orders", icon: ClipboardList },
+  { key: "newOrders", label: "Nouvelles commandes", href: "/admin/orders?status=NEW", icon: ClipboardList },
 ] as const;
 
 const QUICK_ACTIONS = [
@@ -112,18 +115,6 @@ export default async function AdminDashboardPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Base de données</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Text variant="small">
-            Les statistiques ci-dessus reflètent l&apos;état des données. Si la base
-            est injoignable, les compteurs affichent 0 sans bloquer l&apos;espace
-            d&apos;administration.
-          </Text>
-        </CardContent>
-      </Card>
     </div>
   );
 }

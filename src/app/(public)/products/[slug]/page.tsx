@@ -10,6 +10,7 @@ import { t, tf, pickLocalized } from "@/lib/i18n/translations";
 import { getProductBySlug } from "@/lib/public/queries";
 import { discountPercent, formatPrice, hasDiscount } from "@/lib/public/format";
 import { ImageFallback } from "@/components/public/image-fallback";
+import { AddToCart } from "@/components/cart/add-to-cart";
 
 type ProductParams = { params: Promise<{ slug: string }> };
 
@@ -157,6 +158,22 @@ export default async function ProductDetailPage({ params }: ProductParams) {
               </p>
             )}
           </div>
+
+          <AddToCart
+            locale={locale}
+            product={{
+              productId: product.id,
+              slug: product.slug,
+              nameFr: product.nameFr,
+              nameAr: product.nameAr,
+              size: product.size,
+              price:
+                onSale && product.salePrice
+                  ? Number(product.salePrice)
+                  : Number(product.price),
+              image: product.image,
+            }}
+          />
 
           {description ? (
             <p className="whitespace-pre-line break-words text-base leading-relaxed text-foreground/90">

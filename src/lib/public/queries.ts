@@ -3,6 +3,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { calcPackTotals, formatDecimal } from "@/lib/promotions";
+import { applyEffectiveSalePrice, getEffectivePriceMap } from "@/lib/pricing";
 import type { Locale } from "@/types";
 
 export interface PublicSettings {
@@ -451,18 +452,21 @@ export async function getHomeData(): Promise<PublicHomeData> {
       packPrice: promotion.packPrice?.toFixed(2) ?? null,
       showSavings: promotion.showSavings,
     })),
-    products: products.map((product) => ({
-      id: product.id,
-      nameFr: product.nameFr,
-      nameAr: product.nameAr,
-      slug: product.slug,
-      size: product.size,
-      image: product.image,
-      price: product.price.toFixed(2),
-      salePrice: product.salePrice?.toFixed(2) ?? null,
-      categoryFr: product.category.nameFr,
-      categoryAr: product.category.nameAr,
-    })),
+    products: applyEffectiveSalePrice(
+      products.map((product) => ({
+        id: product.id,
+        nameFr: product.nameFr,
+        nameAr: product.nameAr,
+        slug: product.slug,
+        size: product.size,
+        image: product.image,
+        price: product.price.toFixed(2),
+        salePrice: product.salePrice?.toFixed(2) ?? null,
+        categoryFr: product.category.nameFr,
+        categoryAr: product.category.nameAr,
+      })),
+      await getEffectivePriceMap(products.map((product) => product.id)),
+    ),
   };
 }
 
@@ -614,8 +618,11 @@ export async function getProductsPage({
         }),
       ]);
 
+      const cards = products.map(toProductCard);
+      const prices = await getEffectivePriceMap(cards.map((card) => card.id));
+
       return {
-        items: products.map(toProductCard),
+        items: applyEffectiveSalePrice(cards, prices),
         total,
         page: currentPage,
         pageSize: PUBLIC_PAGE_SIZE,
@@ -641,6 +648,10 @@ export async function getProductBySlug(
     if (!product) {
       return null;
     }
+    const prices = await getEffectivePriceMap([product.id]);
+    const effective = prices.get(product.id);
+    const base = Number(product.price);
+    const charged = effective && effective.unit < base ? effective.unit : null;
     return {
       id: product.id,
       slug: product.slug,
@@ -651,7 +662,7 @@ export async function getProductBySlug(
       size: product.size,
       image: product.image,
       price: product.price.toFixed(2),
-      salePrice: product.salePrice?.toFixed(2) ?? null,
+      salePrice: charged === null ? null : charged.toFixed(2),
       category: {
         id: product.category.id,
         slug: product.category.slug,
@@ -714,17 +725,16 @@ export async function getPromotionById(
           ? "expired"
           : "active";
     const isPack = promotion.type === "PACK";
-    // Promotion-level override only: Product.price rows are never modified.
-    const products = promotion.products
+    // Display price: lowest of base / sale / any active promo wins
+    // (same rule as everywhere else). Product.price rows are never modified.
+    const rawCards = promotion.products
       .map((link) => ({ link, product: link.product }))
       .filter(({ product }) => product.isAvailable)
-      .map(({ link, product }) => {
-        const card = toProductCard(product);
-        if (!isPack && link.promoPrice !== null) {
-          card.salePrice = link.promoPrice.toFixed(2);
-        }
-        return card;
-      });
+      .map(({ product }) => toProductCard(product));
+    const effectivePrices = await getEffectivePriceMap(
+      rawCards.map((card) => card.id),
+    );
+    const products = applyEffectiveSalePrice(rawCards, effectivePrices);
     const packLines: PromotionPackLine[] = isPack
       ? promotion.products
           .filter((link) => link.product.isAvailable)

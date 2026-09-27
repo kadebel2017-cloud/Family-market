@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type ButtonVariant =
@@ -51,8 +52,10 @@ export function Button({
   );
 
   if (href) {
+    // Client-side navigation: no full page reload, so client state
+    // (e.g. the cart) survives moving between pages.
     return (
-      <a
+      <Link
         href={href}
         className={classes}
         {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}

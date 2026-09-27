@@ -40,6 +40,21 @@ enum PromotionType {
   PACK
 }
 
+enum DeliveryType {
+  HOME
+  OFFICE
+  FREE
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 // ---------------------------------------------------------------
 // Admin
 // ---------------------------------------------------------------
@@ -93,6 +108,7 @@ model Product {
   categoryId    String
   category      Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   promotions    PromotionProduct[]
+  orderItems    OrderItem[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
@@ -182,6 +198,105 @@ model StoreSettings {
   findStoreVideoUrl   String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------
+// Delivery & orders (COD checkout, Saada-style flow)
+// ---------------------------------------------------------------
+
+// Delivery fees per wilaya, edited in Admin → Livraison.
+// Only wilayas with an active row can be ordered — no invented prices.
+model WilayaPrice {
+  id                  String   @id @default(cuid())
+  wilayaCode          String   @unique
+  wilayaName          String
+  homePrice           Decimal  @db.Decimal(10, 2)
+  officePrice         Decimal  @db.Decimal(10, 2)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// Global delivery-service switch, controlled in Admin → Livraison.
+// Single row (id "default"). ON = current behavior, OFF = delivery
+// fields are shown disabled at checkout and orders are refused.
+model DeliverySettings {
+  id              String   @id @default("default")
+  deliveryEnabled Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Free-delivery rule, fully controlled in Admin → Livraison.
+// Single row (id "default"). When enabled and the order subtotal reaches
+// the threshold, checkout offers a locked free-delivery mode for the
+// configured wilaya / commune / district. All values editable —
+// nothing is hardcoded in the app code.
+model FreeDeliveryRule {
+  id            String   @id @default("default")
+  isEnabled     Boolean  @default(false)
+  threshold     Decimal  @db.Decimal(10, 2)
+  wilayaCode    String
+  wilayaName    String
+  commune       String
+  district      String
+  // Promotional banner shown at the top of every public page.
+  // Only effective while the rule itself is enabled.
+  bannerEnabled Boolean  @default(false)
+  bannerTextFr  String?
+  bannerTextAr  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  orderNumber    String       @unique
+  customerName   String
+  phone          String
+  wilayaCode     String
+  wilayaName     String
+  commune        String
+  address        String?
+  deliveryType   DeliveryType @default(HOME)
+  notes          String?
+  subtotal       Decimal      @db.Decimal(10, 2)
+  deliveryFee    Decimal      @db.Decimal(10, 2)
+  total          Decimal      @db.Decimal(10, 2)
+  status         OrderStatus  @default(NEW)
+  items          OrderItem[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([orderNumber])
+}
+
+// Product snapshots (names + unit price) are stored so order history
+// stays intact even if the product is later edited or deleted
+// (productId uses SetNull, never Cascade).
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productNameFr String
+  productNameAr String
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  quantity      Int
+  lineTotal     Decimal  @db.Decimal(10, 2)
+  // Pack snapshot: when the line comes from a PACK promotion, these keep
+  // the pack identity so admin can group the included products.
+  // Null for loose (non-pack) lines. The promotion itself may be deleted.
+  promotionId      String?
+  promotionTitleFr String?
+  promotionTitleAr String?
+
+  @@index([orderId])
 }
 
 // ---------------------------------------------------------------
